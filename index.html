@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layoff NewSun</title>
+<meta name="description" content="Painel ao vivo de demissoes em massa no Brasil, com destaque para o setor eletrico.">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  color-scheme: dark;
+  --board:      #050e1a;
+  --flap:       #0d1b2e;
+  --flap-alta:  #13253d;
+  --vinco:      rgba(0,0,0,.55);
+  --ambar:      #f88800;
+  --ambar-claro:#ffb84d;
+  --azul:       #5b9bd8;
+  --tinta:      #e8eef7;
+  --tinta-2:    #94a9c4;
+  --tinta-3:    #61748f;
+  --linha:      rgba(91,155,216,.16);
+  --linha-forte:rgba(248,136,0,.42);
+}
+
+html { background: var(--board); }
+body {
+  margin: 0;
+  background: var(--board);
+  color: var(--tinta);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.mono {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", monospace;
+}
+
+.board { max-width: 1120px; margin: 0 auto; padding: 0 18px 72px; }
+
+/* ---------------- cabecalho ---------------- */
+.cabeca {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 22px 0 16px;
+}
+.cabeca img { width: 46px; height: 46px; border-radius: 9px; display: block; }
+.cabeca .marca { flex: 1; min-width: 210px; }
+.cabeca h1 {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  margin: 0; font-size: clamp(1.5rem, 4vw, 2.3rem);
+  letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
+  color: var(--ambar); line-height: 1.05;
+}
+.cabeca h1 span { color: var(--tinta); }
+.cabeca .sub {
+  font-size: .7rem; letter-spacing: .26em; text-transform: uppercase;
+  color: var(--tinta-3); margin-top: 6px;
+}
+.relogio {
+  text-align: right; font-family: ui-monospace, Consolas, monospace;
+}
+.relogio .hora {
+  font-size: 1.9rem; color: var(--ambar-claro); font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.relogio .vivo {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 5px;
+  font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.pisca {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--ambar);
+  box-shadow: 0 0 8px var(--ambar); animation: pulsa 2s ease-in-out infinite;
+}
+@keyframes pulsa { 0%,100%{opacity:1} 50%{opacity:.22} }
+
+/* ---------------- letreiro rolante (ticker) ----------------
+   O mesmo letreiro do aeroporto e do rodape da bolsa. Passa as
+   novidades sozinho; para quando o mouse encosta, para quem quiser ler. */
+.ticker {
+  position: relative; overflow: hidden;
+  border-top: 1px solid var(--linha-forte);
+  border-bottom: 1px solid var(--linha-forte);
+  background: linear-gradient(180deg, rgba(248,136,0,.06), transparent);
+  padding: 8px 0; margin-bottom: 24px;
+}
+/* esfumaca as pontas, para o texto nao "cortar" seco na borda */
+.ticker::before, .ticker::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 62px;
+  z-index: 2; pointer-events: none;
+}
+.ticker::before { left: 0;  background: linear-gradient(90deg, var(--board), transparent); }
+.ticker::after  { right: 0; background: linear-gradient(270deg, var(--board), transparent); }
+
+.ticker-trilha {
+  display: inline-flex; white-space: nowrap; will-change: transform;
+  animation: correr var(--dur, 70s) linear infinite;
+}
+.ticker:hover .ticker-trilha,
+.ticker:focus-within .ticker-trilha { animation-play-state: paused; }
+@keyframes correr {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-item {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .74rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tinta-2); padding: 0 26px;
+  display: inline-flex; align-items: center; gap: 9px;
+}
+.ticker-item b { color: var(--tinta); font-weight: 700; }
+.ticker-item .n {
+  color: var(--ambar-claro); font-variant-numeric: tabular-nums; font-weight: 700;
+}
+.ticker-item.ele { color: var(--ambar); }
+.ticker-item.ele b { color: var(--ambar-claro); }
+.ticker-item::before {
+  content: "\25BC"; color: var(--ambar); font-size: .62rem;
+}
+.ticker-sep { color: var(--tinta-3); opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-trilha { animation: none; }
+  .ticker { overflow-x: auto; }
+}
+
+/* ---------------- 2 contadores ---------------- */
+.contadores {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 26px;
+}
+@media (max-width: 620px) { .contadores { grid-template-columns: 1fr; } }
+.contador {
+  background: var(--flap); border: 1px solid var(--linha);
+  border-radius: 5px; padding: 14px 17px 15px; position: relative;
+  animation: cair .55s cubic-bezier(.22,.75,.28,1) both;
+  transform-origin: top center;
+}
+.contador:nth-child(2) { animation-delay: .1s; }
+.contador.destaque { border-color: var(--linha-forte); }
+.contador .rot {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--tinta-3); margin-bottom: 9px;
+  display: flex; align-items: center; gap: 7px;
+}
+.contador.destaque .rot { color: var(--ambar); }
+.contador .val {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 2.7rem; line-height: 1; font-weight: 700;
+  color: var(--tinta); font-variant-numeric: tabular-nums;
+}
+.contador.destaque .val { color: var(--ambar-claro); }
+.contador .un {
+  font-family: system-ui, sans-serif; font-size: .76rem;
+  color: var(--tinta-3); margin-left: 9px;
+}
+.contador .pe {
+  margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--linha);
+  font-size: .78rem; color: var(--tinta-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------- filtros ---------------- */
+.filtros {
+  display: flex; gap: 9px; flex-wrap: wrap; align-items: center; margin-bottom: 16px;
+}
+.filtros input, .filtros select {
+  font-family: ui-monospace, Consolas, monospace; font-size: .8rem;
+  padding: 8px 11px; border: 1px solid var(--linha);
+  border-radius: 4px; background: var(--flap); color: var(--tinta);
+}
+.filtros input { flex: 1; min-width: 190px; }
+.filtros input::placeholder { color: var(--tinta-3); }
+.filtros .achados {
+  font-family: ui-monospace, Consolas, monospace; font-size: .72rem;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-3);
+}
+
+/* ---------------- secoes ---------------- */
+.setor-titulo {
+  display: flex; align-items: center; gap: 11px; margin: 30px 0 10px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .76rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.setor-titulo::after {
+  content: ""; flex: 1; height: 1px; background: var(--linha);
+}
+.setor-titulo.destaque { color: var(--ambar); }
+.setor-titulo.destaque::after { background: var(--linha-forte); }
+.setor-titulo .n { color: var(--tinta-2); }
+
+/* ---------------- linhas do board (as abas) ---------------- */
+ul.linhas { list-style: none; margin: 0; padding: 0; }
+ul.linhas li {
+  background: var(--flap); border: 1px solid var(--linha);
+  border-radius: 5px; margin-bottom: 7px; padding: 13px 16px;
+  display: grid; gap: 4px 16px;
+  grid-template-columns: 92px 1fr auto;
+  grid-template-areas: "hora manchete tags" "hora resumo tags";
+  align-items: start;
+  animation: cair .5s cubic-bezier(.22,.75,.28,1) both;
+  transform-origin: top center;
+  transition: background .16s, border-color .16s, transform .16s;
+}
+ul.linhas li:hover {
+  background: var(--flap-alta); border-color: var(--linha-forte);
+  transform: translateX(3px);
+}
+li.destaque {
+  border-left: 3px solid var(--ambar);
+  background: linear-gradient(90deg, rgba(248,136,0,.075), var(--flap) 46%);
+}
+@keyframes cair {
+  from { opacity: 0; transform: rotateX(-72deg); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .contador, ul.linhas li { animation: none !important; }
+  .pisca { animation: none; }
+  ul.linhas li:hover { transform: none; }
+}
+
+.hora {
+  grid-area: hora;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .78rem; color: var(--azul); font-variant-numeric: tabular-nums;
+  letter-spacing: .04em; padding-top: 2px;
+}
+li.destaque .hora { color: var(--ambar); }
+
+.manchete { grid-area: manchete; margin: 0; font-size: 1rem; line-height: 1.35; }
+.manchete a { color: var(--tinta); text-decoration: none; font-weight: 600; }
+.manchete a:hover { color: var(--ambar-claro); text-decoration: underline; }
+
+.resumo {
+  grid-area: resumo; margin: 0; font-size: .845rem; color: var(--tinta-2);
+}
+.resumo b { color: var(--tinta); font-weight: 600; }
+
+.tags {
+  grid-area: tags; display: flex; flex-direction: column;
+  align-items: flex-end; gap: 5px; text-align: right;
+}
+.tag {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: .66rem; letter-spacing: .1em; text-transform: uppercase;
+  border: 1px solid var(--linha); border-radius: 3px; padding: 2px 7px;
+  color: var(--tinta-2); white-space: nowrap;
+}
+.tag.pessoas {
+  border-color: var(--linha-forte); color: var(--ambar-claro);
+  font-variant-numeric: tabular-nums; font-weight: 700;
+}
+.tag.setor { color: var(--azul); border-color: rgba(91,155,216,.4); }
+li.destaque .tag.setor { color: var(--ambar); border-color: var(--linha-forte); }
+.ir {
+  font-family: ui-monospace, Consolas, monospace; font-size: .68rem;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--azul); text-decoration: none; white-space: nowrap;
+}
+.ir:hover { color: var(--ambar-claro); text-decoration: underline; }
+.ir::after { content: " \203A"; }
+
+@media (max-width: 760px) {
+  ul.linhas li {
+    grid-template-columns: 1fr;
+    grid-template-areas: "hora" "manchete" "resumo" "tags";
+  }
+  .tags { flex-direction: row; flex-wrap: wrap; align-items: center;
+          justify-content: flex-start; text-align: left; margin-top: 4px; }
+}
+
+.vazio {
+  border: 1px dashed var(--linha); border-radius: 5px;
+  padding: 26px 18px; text-align: center; color: var(--tinta-3);
+  font-family: ui-monospace, Consolas, monospace; font-size: .8rem;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+
+a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--ambar); outline-offset: 2px;
+}
+
+.rodape {
+  margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--linha);
+  font-size: .76rem; color: var(--tinta-3); line-height: 1.65;
+}
+.rodape b { color: var(--tinta-2); }
+</style>
+</head>
+<body>
+<div class="board">
+
+  <header class="cabeca">
+    <img src="data:image/png;base64,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" alt="NewSun Energy">
+    <div class="marca">
+      <h1>Layoff <span>NewSun</span></h1>
+      <div class="sub">Painel de desligamentos &middot; Brasil</div>
+    </div>
+    <div class="relogio">
+      <div class="hora mono" id="hora">--:--:--</div>
+      <div class="vivo"><span class="pisca"></span> Ao vivo</div>
+    </div>
+  </header>
+
+  <div class="ticker" aria-label="Ultimas demissoes em massa apuradas">
+    <div class="ticker-trilha" style="--dur:109s"><span class="ticker-item ele"><b>Eletrobras Axia</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Sistema Eletrico</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Privatização da Clara Camarão</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Macbooks M4</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Criadores de GTA</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">80</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PA</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">300</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Hospital Municipal Che Guevara</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma</span><span class="ticker-item"><b>Liminar</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma BA</span><span class="ticker-item"><b>Saneamento</b> <span class="n">460</span> desligados <span class="ticker-sep">|</span> Servicos Publicos</span><span class="ticker-item"><b>Visa</b> <span class="n">2.600</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado PA</span><span class="ticker-item"><b>Gerdau</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Electronic Arts</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Bangladesh</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">6.000</span> desligados <span class="ticker-sep">|</span> Varejo e Comercio</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado AM</span><span class="ticker-item"><b>Correios</b> numero nao divulgado <span class="ticker-sep">|</span> Telecom e Midia</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">6.600</span> desligados <span class="ticker-sep">|</span> Varejo e Comercio</span><span class="ticker-item"><b>Polêmica</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma</span><span class="ticker-item ele"><b>Eletrobras Axia</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Sistema Eletrico</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Privatização da Clara Camarão</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Macbooks M4</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Criadores de GTA</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">80</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PA</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">300</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Hospital Municipal Che Guevara</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma</span><span class="ticker-item"><b>Liminar</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma BA</span><span class="ticker-item"><b>Saneamento</b> <span class="n">460</span> desligados <span class="ticker-sep">|</span> Servicos Publicos</span><span class="ticker-item"><b>Visa</b> <span class="n">2.600</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado PA</span><span class="ticker-item"><b>Gerdau</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Electronic Arts</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado</span><span class="ticker-item"><b>Bangladesh</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">6.000</span> desligados <span class="ticker-sep">|</span> Varejo e Comercio</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Nao classificado AM</span><span class="ticker-item"><b>Correios</b> numero nao divulgado <span class="ticker-sep">|</span> Telecom e Midia</span><span class="ticker-item"><b>Empresa nao nomeada</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Empresa nao nomeada</b> <span class="n">6.600</span> desligados <span class="ticker-sep">|</span> Varejo e Comercio</span><span class="ticker-item"><b>Polêmica</b> numero nao divulgado <span class="ticker-sep">|</span> Saude e Farma</span></div>
+  </div>
+
+  <div class="contadores">
+    <div class="contador destaque">
+      <div class="rot">&#9670; Energia Eletrica</div>
+      <div><span class="val">2</span><span class="un">partidas</span></div>
+      <div class="pe">sem numero pessoas desligadas</div>
+    </div>
+    <div class="contador">
+      <div class="rot">Demais setores</div>
+      <div><span class="val">46</span><span class="un">partidas</span></div>
+      <div class="pe">56.360 pessoas desligadas</div>
+    </div>
+  </div>
+
+  <div class="filtros">
+    <input id="busca" type="search" placeholder="Buscar empresa, setor, veiculo...">
+    <select id="setor"></select>
+    <span class="achados" id="achados"></span>
+  </div>
+
+  <div class="setor-titulo destaque">
+    Energia Eletrica <span class="n" id="n-ele"></span>
+  </div>
+  <ul class="linhas" id="lista-ele"></ul>
+
+  <div class="setor-titulo">
+    Demais setores <span class="n" id="n-out"></span>
+  </div>
+  <ul class="linhas" id="lista-out"></ul>
+
+  <p class="rodape">
+    <b>Como ler.</b> A coluna de pessoas so aparece quando a materia publica o
+    numero &mdash; nesta rodada, 12 de 48. Ausencia de numero nao
+    significa desligamento pequeno, significa numero nao divulgado.<br>
+    <b>Origem.</b> 550 noticias varridas em 18 feeds
+    (veiculos economicos, sindicatos do ramo eletrico e Google News);
+    484 descartadas por ruido &mdash; materia
+    explicativa, layoff fora do Brasil, checagem de fake news e resumo com varios
+    assuntos; 18 duplicatas fundidas.<br>
+    <b>Layoff NewSun</b> &middot; atualizado em 10/08/2026 as 18:43
+  </p>
+
+</div>
+<script>
+const DADOS = [{"titulo": "Demissões na Eletrobras Axia preocupam a categoria", "link": "https://www.sindinorte.org.br/demissoes-na-eletrobras-axia-preocupam-a-categoria/", "empresa": "Eletrobras Axia", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "PA", "veiculo": "Sindinorte", "data": "30/07", "resumo": "<b>Eletrobras Axia</b> &middot; numero nao divulgado &middot; PA"}, {"titulo": "Demissões em massa e a falta de investimentos tornam o sistema elétrico uma bomba relógio", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQYkNqSzY5SmJHeWk5WUMxOHpFcE4tOE9RRzlzMlA1WG5QblV5amFUQlAwc2doS1ZwVWkwa2I3U2FGT245NmNWbi1GazVIOWhja3ZGX01iVk9sU1pmeTVtMFd4ZDF4Mm0yMWhxaFhqdWFra0Zwakg1NHViTTVZbmwtdjA4TjRTR3F0dW1KNlluS0hzTmgzaHJSaHJrRTh0QWlTOC1fd2tSNXdrVWU0NXZESXh2QmVzbkVHbEo0UjFXZw?oc=5", "empresa": "Sistema Eletrico", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "veiculo": "fnucut.org.br", "data": "21/07", "resumo": "<b>Sistema Eletrico</b> &middot; numero nao divulgado"}, {"titulo": "Após crise, Apex nega rumores de demissão em massa", "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQVGlzcjcwLVV4RFBxblJRWnVLaTM0ZmpIVEhHbmcyUlRpdmY1bnpCSkNKLXIyeDd2dXJ4a09uXzQ4WVlfZEpaaTl3eVRleTRaMmxLNmRobjl2S3JlTVgyYmVyTHU3Y1lRNkJGRUJVa2xBZ0h2SWwyTzUtUk82YXF1Y0NoSUZ5S2FaSV8zeUhuNTJIVkJsNkxFbkp2Yw?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "simnoticias.com.br", "data": "10/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Fim de uma era: fabricante de doces famosos fecha fábrica de 100 anos e demite todos os funcionários", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxNWS1DYVNxUWFCcWNQcW1iRzhsZzViLTFrcEZmcVIzdEw4azk0RDhMQWcxWUc5QUwwUG5HdUxkSFVtOU51SF9FVlFLd0Z1RmNmWmk2MWxwazQ4dm5rSkIwb1hKUi1ISnIxYkJyb0ZWaEN2RVVMbjgydU9NRm5rcHlpd05UZHN4cVR3NnpvQ1FaWHlUdGpPRzlGNnpqWlR1OElvMFdhUndhTWlObmRtYkQ3N081OGp0dEVBanhYVA?oc=5", "empresa": "(nao identificada)", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Portal Tempo Novo", "data": "10/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "SAIBA QUEM: Privatização da Clara Camarão: políticos prometeram empregos, investimentos e combustível mais barato; RN ganhou demissões em massa e gasolina mais cara", "link": "https://news.google.com/rss/articles/CBMimAJBVV95cUxNelEtN2tGcUtxZEFubXBVZnNNS0hQV051UnhMR0Q0VG1fWUF1Q0FEWWtmX1g4bXExT19zcmlLd0xpNmw5N0o1Tm9sVkhNQjRZa3p4N2lWQmNYcTFRVG9kUzFCS3BUby1NWDhHRTNRMGJkNVlWaU9hU280WFFrM1RkX3pGUXVEMjRJdmRyQUxDQmM0eldac0d4VGhkLUk2Qk54TU5LeVBwM1hoZTMyMWMzd1k4elhVV3VWVk52NGloaXk0cXNzZy1rZDc3QnFOU2lWaHRySmpBdFFvUGJQQWkyVGo5djliZ1Zrb0R3X21PRzNLWlRfMHFUXzh1TXBJQ21acVB5Z0pJYkRNVUtNaG5JMzhHVGRHMjlo?oc=5", "empresa": "Privatização da Clara Camarão", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "O Potiguar", "data": "09/08", "resumo": "<b>Privatização da Clara Camarão</b> &middot; numero nao divulgado"}, {"titulo": "Empresa demite funcionários e manda destruir 100 Macbooks M4 com 48GB de RAM em meio à crise de memórias", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxOdHh6R2tFcFZPdlUxTUxQU3NOT3owQ3hscC0wUEk3SXEtdXFROG1fY1g5SjVaRHZWWnNPZVlFZEs1LTBETDhNZVVRa2prVVVsV2xlYVNkS1JqdzhsaUNERkN6N1htMlJXR0l4blhHQ2dlUERIMUtUX3VHUlZjRDIzSkJVa0tKNThCaHUyc3RaeU9wX3dMMXhxdFBzd2ttd2Z6UVpieXZURUtMdEdXckcxS1FBcVJxOV9TdGhPLQ?oc=5", "empresa": "Macbooks M4", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "tecstudio.com.br", "data": "09/08", "resumo": "<b>Macbooks M4</b> &middot; numero nao divulgado"}, {"titulo": "Criadores de GTA 6 fundam sindicato após demissões em massa na Rockstar", "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNeVhCQnZ1WHNaa1JaSVRoSFlKRk1ZY1JHeWtfYnhYUUNMbE5MUTdEU3NNTTNVSGhNVTFMcGhENUtiYVlQYVlGekFpd0RZcjRxZEo1T3BvMWlXWllMVHRkS1B3bW5VTlBrU2JaSEFTcWpHX2hpRWhPbmRIX0h6UEJlSUMyYzNsZlVYVG5TVjhwSHc1U1BkQnVRdXlKNHZnRmpSZ1pRZDJGS2FLZVNmak0w0gG0AUFVX3lxTFBNelR6eDZtMEJNWjdhMTBFaHp5X0I1VExaclVoamtDVWtCR2dHcU4wTHFZNFlnblp2X0FpeExHMHg5YTA1YmNHNHlZeUJlNkR6c3NEdlFZQjlHZGNOUHRrYzN1bjZ5Umhnalp5N3RmRHIyNW0ybXRSbEh5WEFMQzR4OVh1a25sVEdUZDJCMlFxck5ITVE3eGM5TEFTbTlyN3hLXzlQcnhlY2o3dlVxSGhYc2VDTw?oc=5", "empresa": "Criadores de GTA", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Mix Vale", "data": "09/08", "resumo": "<b>Criadores de GTA</b> &middot; numero nao divulgado"}, {"titulo": "Fábrica de doces com mais de 100 anos de história fecha as portas para sempre e corta 80 vagas", "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNVmZ0RXhjZE1QYVJNUHAzbnhJTXJNeDVrbjVoUXNvaGgtSDJkanF2YnplZUs1RVpnQ2JTZXpzS3E4ZWZyeHdZZEJsdDFRal9Ldlc1VGpSMVpvU2tNWENyaXdwdEJ1cXVMVkVzOTBMVHlROGFKSEhoTWxIVTlnLWxYMWl1Mzh3ZjNDNUtldUhXSXpGTWtoMUs0TDV4N3hwQdIBowFBVV95cUxNZlY4aUxIeV9Ec0xUQXVRNmtDQktqemlQTllDOW91VEQ3d1dwbnlFNEdEOWhZemFUMGZyeFlWbVRoOXhGZDdYbGl6dF9oVzRfaUd5dWd0M0U2QlZGYm9PMklHM0tCSVBvZVIxZFdnRDlkTXNPc0gxYmtVdkN2UHpwQTBJaDlhOUM3elhMRDdfTjJVb1BTUXVfNGVSbWFqekVHVV9z?oc=5", "empresa": "(nao identificada)", "setor": "Industria e Automotivo", "destaque": false, "qtde": 80, "uf": "PA", "veiculo": "Banda B", "data": "08/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 80 desligamentos &middot; PA"}, {"titulo": "Gigante de tecnologia demite cerca de 300 funcionários e reduz 5% da força de trabalho global", "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOTkVONjZXLWJlQXlYc0RiZWdISzdmM1NFUVJPajdpbnNpSnFRSEF0OERLOExOakJVME5LOEQ2dDl5X1BmM1NvWUgwQUxwYTNwV3ZOYmE3b3hMSU92LUE1THNQamxRT2QxNV84b2Z3d3dfYzVuUnkzTzg5VmtraUFkRFcweTNxUUpiYWpsOE9MWDRULWVCNUh2cGFGblpOdWtsNUE3S09Bbm3SAa4BQVVfeXFMTnFMekliUnRhcDVnN2VGWUdEYTNTenc2c2VUQ1pRWXkxc0pFXzNTTENmNUVMZi04WnkwMXd6ZURmVlFvYVFIcHozTEtjMlVTWFVNVlE4dDB5Q3FjT2t4cFhzcDhqXzJqdHdWTExpUnBiclhsLW14UUVnVmdqTnNwMjgxd2JCTmdOUUoyQkZyT1NoS3hKVFJXSERsSm5ldHZ5TFlzQ00xTUFNOXVpN2pn?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": 300, "uf": "", "veiculo": "Banda B", "data": "08/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 300 desligamentos"}, {"titulo": "Funcionários relatam demissões em massa no Hospital Municipal Che Guevara", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOQlJ0bHdXYlF4S25VT04xZkZkakhxSGgyUUJXdUNneGNadDBQQXVyeXF0TzAzbE5HUE01TGhJTlowUzI3Z3dzQ190czUyYzJmQ2xCSDNuZkV4VkVWSVpmb0VZTVhiZlFSZUtDSFZoSGpUNW9keWI3ZTFUb3BxcWdWNExUNmxabDdwRTdld01ISWY1UWd1SXdLZGMxQzBSbGUtM0o1MjZtVUsta2x1aFExZ2dR?oc=5", "empresa": "Hospital Municipal Che Guevara", "setor": "Saude e Farma", "destaque": false, "qtde": null, "uf": "", "veiculo": "LSM Notícias", "data": "07/08", "resumo": "<b>Hospital Municipal Che Guevara</b> &middot; numero nao divulgado"}, {"titulo": "Liminar suspende demissão coletiva em hospital da Bahia", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQOHVBNVNCV2xzLVZyRTkwb3JsLWNFaThVVnVhU0lKVWNGMjNPR25OQTdSZDd2NWFzbHpGZko0YURQZktJRHkzSXYtRHlKRXlwTkpZUUxONTBhQzRLZHk2RENFYU1CUExMdXFEVGd5YmFOUEZQUEJQUlJNTVlBd2VRbU43Mkp4OU9TejktZGJ6V0o4TUY1LUNRaFA0VUg?oc=5", "empresa": "Liminar", "setor": "Saude e Farma", "destaque": false, "qtde": null, "uf": "BA", "veiculo": "acordacidade.com.br", "data": "07/08", "resumo": "<b>Liminar</b> &middot; numero nao divulgado &middot; BA"}, {"titulo": "Rio + Saneamento demite cerca de 460 trabalhadores; sindicato denuncia caso ao MPT e cobra cobra reintegração", "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTE9pbHJORnRMb2RmckhEd2UzT3loR25tYU5kdWdBWXBhLWU1NWRyWGthaTlhaHVWSmNrYmRhVTN2V1RjWTlMSGk1M3ZaN0xXZTVLejU0TkhFZnlTaVdoV1l6dVBPYmxaN3VnRXhVMV82a3lEYTlmX3l1M3lUWk8yTWs?oc=5", "empresa": "Saneamento", "setor": "Servicos Publicos", "destaque": false, "qtde": 460, "uf": "", "veiculo": "Tempo Real", "data": "07/08", "resumo": "<b>Saneamento</b> &middot; 460 desligamentos"}, {"titulo": "Visa demite 2,6 mil funcionários e associa os cortes ao avanço da inteligência artificial", "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNM2pDd1pWVjNqcjRDTzhQaHhINm8wYUhUVnRDVDBsZlpfTEszS0ZjamxhWWdiTWhzTXFWYmR4eXQ4a3ZGWEYydy1qNzVncnRFN0RleUEtUnFyalFSYXpzRU9DdnFSaldDWVRqTzJiWUtmT0I4QnZSRlYxdXFGSm52dmhqWmdwWmVzcFhNVU1uU21nZXcwbFU3QllCZGdGckdZS3FsOS1YUdIBrAFBVV95cUxQUjhXZU55YWpnN3VkUExJVzh0WFhCd2kweS1WandWZ3JaTmZLWV8yZHRtMnFDZHd6T292bnVtUm9KTks1VTRiNUFFQ2tjSjNJc24tbnlzU1ZFTGVOU1BJUDJuUVA1UjBDbzN1dEZiTGdqVlp1NzBZWWRNd2tqSURmTkxHYlRPNGZvTnJxOUloRTRSYi1PX1JRdy11Sk5BeXh0NjVSRFhWTExtNUds?oc=5", "empresa": "Visa", "setor": "Nao classificado", "destaque": false, "qtde": 2600, "uf": "", "veiculo": "Banda B", "data": "07/08", "resumo": "<b>Visa</b> &middot; 2.600 desligamentos"}, {"titulo": "Funcionários da comunicação querem demissão em massa após assédio", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPbW9HQ2NrYjJKZXB4TERqendOVFZVY3h1cm55SWJ2ejcyRGFMaGQ1U2JsVDJXRzRhQjdWMGdPOUFROFl1OHdvcUpDN3F4QmMteU1ET3pRT21DSXlHUUdZOFdpUGdEOVA0Mk1YanFwRjRSSHNnUkR6aUpRTXIzWTY1YzVZMDNhRW5mM1lYZEcwRWFMZ2E1dFhTbGl2eGZxSV9wam13?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Diário de Ribeirão Pires", "data": "06/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Após reestruturação, gigante brasileira confirma demissão em massa de 160 trabalhadores", "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQOG1hRk5UM1RLb1RwcGRuMkFKUzB2R1R5aEQxQW5rZjY0RlZZUVB2SGR5ZEVtbmdrVDMzZlFTN0theVNFdWFCdktJMGNKWTBaTlZ3VzNPZFBib1NXcm9JemxVZzVkN3E1NFNZTG84aVBDMEY5NGdsWEQzN1RzeVNOSW5ybV9wcFpRdEhPYTNyMWV1VEsweUxmTg?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": 160, "uf": "", "veiculo": "ND Mais", "data": "06/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 160 desligamentos"}, {"titulo": "EA pode enfrentar demissões em massa para cobrir dívida bilionária da aquisição pelo fundo saudita", "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxPYnZDM2tLUlA2bXZ2LU9vai1BYU12WUxlcXFoWUhYRlBwMkRvQVZwLUh4cW9nU3A3UXZzRVpSVFdPNGJhRTI0Q1hwUVFrOWhSTWZiUXZ4blEwSG50Yjc4S2R0cUhIZDhxOXF6RG9pWWQ1b1NSM3RVZ1hVZjJZUHgyNXZlcG05VWNGaXIta2h4LXFDQkVpS1dDRkhseGZ4dU1CM3JPLTI1NzFzdFd6QXlmOFhnVWFfR2JZeG12a3JpaXFkbklWYng4R2hMYzBjdw?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "PA", "veiculo": "Critical Hits", "data": "06/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado &middot; PA"}, {"titulo": "Gerdau encerra setores da unidade de Pernambuco e demite cerca de 160 trabalhadores", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOdURKMHhueTR3YnlkMUtscDRLc1RSMjl4Y1RBczlDQnRRNWVvNW1kYk1RQ3VGSloyTFNMM0o3OTYydldrZDJjU3pBZFdYV3NPcW50cFZ3eng1cmd1WWdpZHRzVEcxcnMzZW9SbVV4Nkp6V3ZORzRFZ3lLSlNHcDh3TGxqVUExNEdadExqQ2RHcjZyaHNmZlQ0OTJpZENtSkxOVDhtcWpKSjRkaWR5YmwzZkw3bU43VzR0dlNPUjBSbE1udFlqUVM0SzNhMmszTHhuZ2FOc3llY0tlZFJrS1NZdUl0ZlpuenM?oc=5", "empresa": "Gerdau", "setor": "Industria e Automotivo", "destaque": false, "qtde": 160, "uf": "PE", "veiculo": "Diario de Pernambuco", "data": "05/08", "resumo": "<b>Gerdau</b> &middot; 160 desligamentos &middot; PE"}, {"titulo": "Electronic Arts deve sofrer demissões em massa após a sua aquisição", "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNSzZFblJ6ekNGVUZZczJvWjNtTmtqZ1N3bm16MWtLOU90aGQ3aGxITGdaYWNzWjZVM1JUYkhVWHJfQ3JKQ3U4VlB4dWdWSWRSdllPdnJBZUVvaExsYjNldzFYV2laZTRjdGZBNlBIdXUwWno2dzYtdHFVTXNlbGgzeHVGMDRva0ZkTFAzWVhBY0hFWURPZEw4Tg?oc=5", "empresa": "Electronic Arts", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "PSX Brasil", "data": "05/08", "resumo": "<b>Electronic Arts</b> &middot; numero nao divulgado"}, {"titulo": "EA pode passar por demissões em massa após aquisição por fundo saudita", "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxNdW1SM29lM21vb2dFV3VIRXJWSFBLTnRSNmF6TnhueC1DWkt3UTBaaWtwUlpyTDVKaFlmWnF4dzQ4blhNLTRwcU1laW5tVVJvSlVXUlZ1SDNvS21FcVJLb19sT0VySzY4VHY2R2N0dWxpZjJ3ZWc5ZXJNbUx6S3VsZ18yU19RZnZUcU1HSktPSDY4cTloOHhPR08zTmZUR3FyNHB0cTJn?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "omelete.com.br", "data": "05/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Outrora próspera, indústria têxtil de Bangladesh sofre com demissões em massa", "link": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxOV25YeU9KNTNFN2RVT2V2QmNEN0VzdFAzcjFiQVo2TXc5NFplY191eGJjNThGclFBR1Z5TzJsczJnMmxJcmxyZjVnT2oxbzJkSFIxd2t6SExKRmVaNHY3czZRVlFfVnJnWjhQNnduN25WRnZTdXFOb1YzNE5YTVZPSGlDemFsRlBXaW9RbkNzRXVQSmQ0R1NzdmpRQlJTY240cF9pUmlaSWxsaTF4dk5Ld3BoZGJobDBnXzNoRlR6clBGRExGMVg0YnlOZ3BCVEFYT0w0VDJYUQ?oc=5", "empresa": "Bangladesh", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "UOL Notícias", "data": "05/08", "resumo": "<b>Bangladesh</b> &middot; numero nao divulgado"}, {"titulo": "Gigante dos supermercados fecha 29 lojas e demite 6 mil funcionários em várias cidades", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxNU3ZNNUhkSV9TMTI2OXRqR2UydTVBT2pMVHRzLTgwSmlrUTBiWVpLNHVoVE83TkRINWVWUS1tb25OZ1IyZ05uTXdURS1JOWhDaGlvdXQzVEdhdTN2NmZhOV8wTlVBVlBmbTdGNXBXLWN2aWt5Tk15OE9hUnhEZ09GYzlWd3pQSVVNWW1aY1VEUno5SmVpb2h3VVliOW5JRE1GdnRpSkhuUkZ2cU5NcmRGZmdBWmtITVdORFRURUtONA?oc=5", "empresa": "(nao identificada)", "setor": "Varejo e Comercio", "destaque": false, "qtde": 6000, "uf": "", "veiculo": "Portal Tempo Novo", "data": "05/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 6.000 desligamentos"}, {"titulo": "Funcionários denunciam demissões em massa e assédio durante intervenção em cartório de Manaus", "link": "https://news.google.com/rss/articles/CBMiXkFVX3lxTE84RGNnZlhTZUttWDNxSWYzdjFwTmFwc05sZWtSeGRFMXN2TkpKSThIRENSYXFYWnlDX0RCaDBpamIxNVBHMU9hWUc0ZkozWXRUWDM1QXkyVVdBVEFhMUE?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "AM", "veiculo": "AM POST", "data": "04/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado &middot; AM"}, {"titulo": "Correios registram adesão de 30% no Plano de Demissão Voluntária de 2026", "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxQWHpiVmR5YTRXanM5TGJweEtROWZuc01SOWlCdDRRbDlDQ1FLNTJTclhOV1IyTDJWNmlrREh3YVNlWHVGVG00c0lNVk9PX29CU25PVDBVbXVEeVF0R0ZYZk10bTFYaktKLTBDc0Vjd2pLODN3WHlBcWtkNmtEem13RWVHZmItZk85YkJLcm41RjZ2eENnTXN4bkl6V3BsZw?oc=5", "empresa": "Correios", "setor": "Telecom e Midia", "destaque": false, "qtde": null, "uf": "", "veiculo": "Metrô News Jornal", "data": "04/08", "resumo": "<b>Correios</b> &middot; numero nao divulgado"}, {"titulo": "De surpresa, gigante americana fecha fábrica no Brasil e demite funcionários", "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNb2V6U3BxdEhYZGlkVHhHZEtlSGxuTnEtTXJUYUIyTVZZRklCNXVJamk0YWVyRzV4NzFYdW1NUmFtZjZjeVEwdWctYmpRZEJranRsSEJTcThpOGF6MlF2dTRZSTZoWUI1VDNjaXJDY3BSNmtkWTY2QXJOYXNCbGw3U1Q4SGtXdXl1Z0lkOVdGUndWTWpCOFQ1UEJqTnpfUUsyYjdHNm9aMWJmV3Jxc0xIOA?oc=5", "empresa": "(nao identificada)", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Portal Tempo Novo", "data": "03/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Grupo mateus fecha 28 lojas e demite 6,6 mil funcionários", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQSVY3TmI1WFRRaXl2bHF1dHpHNW13Z1B2Z1BHR0xaZnkwTTdSVDlpd3dmeUlQb0tBR0d0Q3hRcy1ocm1LOGh1aEdYbTg5MmhuZGE3UF9ZSUhqS0huLVZiaEtaTnI5YUQ3d0EycGp3TmVEUG5uRWdtRjV4M1JIbUF4Y0NQUjBjSDh3b0ZuaUJ1aGVFa3RzZUFwRlpR?oc=5", "empresa": "(nao identificada)", "setor": "Varejo e Comercio", "destaque": false, "qtde": 6600, "uf": "", "veiculo": "ND Mais", "data": "02/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 6.600 desligamentos"}, {"titulo": "Polêmica! Após demissão em massa, hospital baiano é alvo de denúncias por mudança no modelo de contratação", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxPVGc2Z0JfTkZmM0RRODl0V2tISkZpR0VWUnhHeGN6T0RuSl9tcVlBYVNtSDJ4b0NOSTEyR2JrQndqSkNXM0NjbFU3WmR3UDl2SDRyaXNOelE5OEtibzNMdE1jYjNpMmZ0eWhUVS1DQTNNaWVTU1BMcjVHbGtHS3R3cy1LTGYtQm9wcXE3MVNnMHJpa0psdzlGWUtVNzVUNlZxcEpZNmZnUEdaYVdzNUl2eDlfcXJ2d3IyU3pCMGppZ3BHaWY3UWstWjZrQmkwdkdSYjNjR1pKWjRhaVgySWZLRjVuVHc2SlXSAewBQVVfeXFMUDhVUzhLTHRIeWRuTVdOaVJTOVpsR3pqV05TRS04SFNPRnpWRVpscE5qSUpRWmJ2RXl0QVp5cHAwendvQ1BWNnlZNnFoMnFnODY3RHRGUHpJaUlQTWF3N25vZzh5XzlXTUJ5WDhROTFSNjVwNG1RWG5kY2hVLVBVR0ZsTnZZdUl1NnRTR0JGM2JBMUJ1WTBPSTlTZGstR3RzY2Y5X25uQW1UOWlCeHZKX3UxSEtsRE1ZNzQ4QjQ0LWFqVEppeWxBODFLOS1QUkZrWEI2WHJwaldoOFdoZlpZWU0tdHdEeElBUWx0V1M?oc=5", "empresa": "Polêmica", "setor": "Saude e Farma", "destaque": false, "qtde": null, "uf": "", "veiculo": "bnews.com.br", "data": "02/08", "resumo": "<b>Polêmica</b> &middot; numero nao divulgado"}, {"titulo": "Veja 5 perguntas e respostas sobre o programa de demissão voluntária na Prefeitura de Piracicaba", "link": "https://news.google.com/rss/articles/CBMi9gFBVV95cUxPSjg0WjVHRU5LWGh0RmEwTDgyWnpXeFJ3dmpsajFacmtZN2xHYXZzemtoLWZvQmp4YWdXYWEtS1FQTFA0S0lFcHZ4R2JiOHpzOXdpU3lLTlBvMUR2amZpRTR5a0hfSHdqYnVrcHBHT3cwbVV6b2JSWEpaWGV5QUNfQmU5LW5oR1Frd2ZfanJMNzF6bUM3X3FQMnZDd0lGNWtNTEFIZHVkSXkzdkl5Qmo5ZHNUR0dvZUhycjNId2xFNDdTNHBkakZKYXp5aGlQQlJUMW9YVzBNWDZ4anVYZHpqNmwzZ2g3b2d3WnNjLVQ3R2dDQ09vQ3fSAYQCQVVfeXFMTjBIc1oyNExVUW1RV3FfbGdTQVk4VGZjX0VKU3FuQU5tMXJqcjRVbElhSnNsdTUwRFZFNEY3aW56ZlJ4ZUQ2NVFqeHU4cG90dTZ4d1pSdWZJT0dYWjliVE5kb2JyRmZDME0tdUw4WDZqeHlXZ183ZGtmdHY5ZkZobnZfRDNnZlNmM2E5WGpzOEJCNHBXY21vbWdkUTVXTnBlcTNyeDhPSVpUaEJjZHQyWVNPSVY3aDdTZThiTVFJRVQyS1luMHJ5bDIyY2J0d2ZWaFNDYTFnM2dkbTk5V19wdzluR3JhUnRVa0xmdjdoXzhpc1puamUwLWNSSW9KcWZNSDhvVFE?oc=5", "empresa": "(nao identificada)", "setor": "Servicos Publicos", "destaque": false, "qtde": null, "uf": "", "veiculo": "g1.globo.com", "data": "01/08", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Exames remotos e pejotização: os bastidores da demissão em massa no Hospital da Bahia", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxNT1dIU3FOWEZHbkxMVGNBR3pOaWxLU1V2TWNaZFplT3o0ZTlBdDZqX1E1TTBEaUFyTnljTnI0dElWYnBnVW1jT2RNVkxHOWMtTFJBMmc4QzJXSmRhRHViTkZKZDVhVzVPMWU1eWwxaWNMVmNnWnR0dG0wbWVRSENSSDFhbWhFWngtc1Z5Smluc3A1UUxDZnpQR05keWpJenMwaEE5RkxhcndieFhrb181UkJsd21RRUtXQVJVZtIBxAFBVV95cUxPVjczOTVjX2FrTDRMVkhFYS10ZU5qa3p2SHFqczJKTkdPYkRNUEJxRFlpZnFwVGJCemZOS00zMjMyemJoR21KZkZVN1lsYXlyalQxb0taNUd0eHloR0dqWkJPb3ZsUUkwYzBjdFE5eHB5X2NLNEZNaWNuRGo1U0NnSEwxWEl4ZTBZOVliSFhjV2FtM1dZOWVMc1dWTEMyMFNLWkJKRWs5VjhoNmdRNmRscF9zak5SS0g1cEVhTGVZdTMwNkM4?oc=5", "empresa": "Hospital da Bahia", "setor": "Saude e Farma", "destaque": false, "qtde": null, "uf": "BA", "veiculo": "A TARDE", "data": "01/08", "resumo": "<b>Hospital da Bahia</b> &middot; numero nao divulgado &middot; BA"}, {"titulo": "EuroChem pode paralisar e implementar layoff em Serra do Salitre devido à crise do enxofre", "link": "https://news.google.com/rss/articles/CBMieEFVX3lxTE1FUmpCMjBWeG01TDVyOEZqbWI3Tk83SjVvdjA4ajBzVWtZTTFTZjA2Qi1HU2RMOUtab3dWelVzbjE4dTUtS3NGSEZ6Rms0SDd3T1I0eUpXVmNGaFJHdlFkdW1SZHM2MDZQM2wtZ0xKcnI3a0lCZ01FNg?oc=5", "empresa": "Serra do Salitre", "setor": "Varejo e Comercio", "destaque": false, "qtde": null, "uf": "", "veiculo": "Diário do Comércio", "data": "30/07", "resumo": "<b>Serra do Salitre</b> &middot; numero nao divulgado"}, {"titulo": "Sindicato denuncia: siderúrgica de Sete Lagoas demite funcionários e afirma não ter dinheiro para pagá-los", "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPT1gyVnB4dElLTklacVRDN1diX29xOWJzdnNOMUxYSmtldHo5REhwbUZVWmNkeGZwRGJ0T3Y4WmtPOHcyMGp6R2xmd1Yyb1JDRENzb3NOdUlZT0FET3VoNjBVQU16OHRxLWZpQVBjT0QyeVFINzhCM0ZDTi1HQmJaendSYk9Ibi04ejFvS0xqdWY4WERwX1VxajZzbzNsR2lPZlh0WGtsSjVqZThFeXpvN1laZXJLZXN0Rkc1NDZNTTBmYzZ2V0dHZW1DTVN0dGs?oc=5", "empresa": "Sete Lagoas", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "PA", "veiculo": "Sete Dias", "data": "29/07", "resumo": "<b>Sete Lagoas</b> &middot; numero nao divulgado &middot; PA"}, {"titulo": "Flávia Moretti chora e admite que Várzea Grande pode ter demissão em massa por falta de capacidade financeira", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxNZVc0MEhhbVNPWnBSUllBNVRLM01MYlNPUHRGOUM4LUcxb3F4LTFWZ2RBRURGWVlEYXhmYWkxa2JIREcwQWd3Qkl3b3JxZGVQVkg3SWtOWEFGOFNfMnBVZUVBUGtqdktqR0ZlZU1kOHUwMm1pUmEwZDIzWmx6RzNVNG5hdDk5OFFLbDlXbF9tTk9CUHVheEdhQVl5YjJ6VWE2b0RnbktMOV9LU1BkVWM1MjFqcVZISjJQdnR2WGFHUWN6RXl1NmZ0OXYySkxfWlpWeVZ4MnVxd2QtLXlZeDExZnZSb0hVaTA?oc=5", "empresa": "Flávia Moretti", "setor": "Bancos e Financeiro", "destaque": false, "qtde": null, "uf": "", "veiculo": "RepórterMT", "data": "28/07", "resumo": "<b>Flávia Moretti</b> &middot; numero nao divulgado"}, {"titulo": "Gigante fabricante de carros anuncia demissão em massa de 5 mil funcionários", "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPZkU4cHhuVldsZ1VORVctOWZZSzJ3a1l5RV9KQ3RsZkpERmFkcmMydEtVUzI5bmIzRk5vYWtqeEtpUEFXNzJNU09uZnNkVHdrU2NZQ2d1TE84Z1hTR0xLaFdmTjBSSkpkTXJKNnphRzhSQmhVOEFXNGwzazI0N2ZBMjZCQTdxNXhITVN3akNpaTc5UnY4aEpHZkJFbVNRaDd1Z0Fub1Y2eHFNaDBDSWsxMTY4TzlxcDJNRWYwXzI2WGx5aHRFTzRJaWxfTdIB0AFBVV95cUxNbGQ0MW93YU9hZ1ZoNEkxMGFkTGRhaC1Obld0ejE2OG1RdVJWNHBqd292Ni13VzlvellSWVc1YW5yN1JWRVJ2aFZZNFM2cGRFZm5VelpPcGFUc0FpaVJkMnRrR3VTTllmWUhBbWxCLURtU1RET3d1TVFsaWkzNTBkT1VyR0JxN19Bbk9RRmRqVmt5YWpQeVlVS2xkV1IxTC1JQjl1UG5QVTItaEk1R25hTl9DTkFVQXZCSWx1WjBsSEVrRy0ybC1pcVRyZG5KT25i?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": 5000, "uf": "", "veiculo": "Jornal da Cidade Online", "data": "27/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; 5.000 desligamentos"}, {"titulo": "Demissão em massa? Globo toma decisão com o fim de ‘Coração Acelerado’; saiba", "link": "https://news.google.com/rss/articles/CBMiuAFBVV95cUxPR0o3T0JIa1NOYmNURlFlQ1JJMnJobGVQN1JrSlp6S3FIRHVwLTlJZUd5UklScDd1bi1vVHZWaE4tc2VPdXhnU3cwdUhrUFgyLXBLVG50VGZOSmpzdHhJZVJlZHZOQUVGUDEwcHE3TzQwOUZnYmRNNXhWOEhHWTNHbVNVME0wQUhfaDBXRlpTZGRzaWJmb0JzSC1yaXpGN25FSWd6Y1UtNlBzSmNFVndTMFlWSmNKQ2du?oc=5", "empresa": "Globo", "setor": "Telecom e Midia", "destaque": false, "qtde": null, "uf": "", "veiculo": "Mais Novela", "data": "27/07", "resumo": "<b>Globo</b> &middot; numero nao divulgado"}, {"titulo": "Demissões em massa podem afetar por quase três anos a reputação de uma empresa", "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNczBoc1JDNEVaTWppc1hlaXh4YURKMFllb3FqMmJqV3I0TlFtdEl5ekI2VGFadC1aaEZ2RlUtREFEMDFzbUktQ2g3U1lVSHVjM2VCR2J0TVoyREN4VE16V3p0QU5EbjFGcHBSTFpkdU1iQ1VranFIUnJfUTVPTUkteXNYaVFYU3FoWUlyanRiUV9xMFVOUHJNQ2d6UXVuRTJtb2gxMy0zdEEzQzVRNlBwTEJPdnpET04zQUE?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "fastcompanybrasil.com", "data": "24/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Governo do Rio demite funcionários de confiança de órgão investigado", "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxOWnBkcGJqb3dkMVQ4N0xNUHRrZDdlX3pLczRQSGQyc3NNTFZ0dGFhbGRpVUlNU2NLNHVKMFVvWU5LcDdFVl8tYUU5Y3FIUTM2TkxYTDVFMWtCNmNZREgwU0JhbW9LWTBIemVBbHcxV0RsQ2RYWWtpVk9iNmlNcmY3RU9FUVFJT2hLYXpSeFFxdDRHZi1XQW9LOGlVV0NYN1JlLVhBVnQ1aHlHaXB4?oc=5", "empresa": "(nao identificada)", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "bra1.com.br", "data": "23/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Disney Realiza Nova Onda de Demissões em Massa", "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxPNXZ2Q1FyQWZ5a3FyZm96QVkyLTVIUGVmSi1hMk9GV1E5aEpBZVlkOGF1WkJGTEhXeWdjMW9SaHZBYkJsdmwxZUFZMGJRMzNmTmh0d3pTSTJENXIwOHhqd19TelN0ZndQYml0WnVmRFpsNUVZbVotVkJQY1ZYMXdrWEhaVHFJUmtJRVZhV1dFWQ?oc=5", "empresa": "Disney Realiza Nova Onda", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Forbes Brasil", "data": "23/07", "resumo": "<b>Disney Realiza Nova Onda</b> &middot; numero nao divulgado"}, {"titulo": "Grupo Paulo Lima inicia demissões em massa na TV Fronteira; Sindicatos dos Radialistas e dos Jornalistas acionam a Justiça do Trabalho", "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxPN0t1TlYtSDNIX2FpdFNvS1kySW1Pc2dMVVZ2Wi1Ja204OFBIZVpDdmZJSzFzekNINEs2c1lsNzJFUHBhbndfdXlKSVdYVlR4dnNwS2ZFWXBDRFBEQUVzT09jeXJjbmIxbWYzMDFodkxrMVRWc2JBa0tUY0k1RVhuT1lTY3VTYVRLZUdtdnN0cFQyamlkQnd2TmdTMFMydmVGXzdfYWl4VV9fQ0ItcWVYd2M1T3VidklTcjA2cGtGT25TUHlZd2hqVnJDWDhubWZuUXc0WTB4T1JpNXllSlNxWWc3UGp0NTdyVE8zb2VreTFxYkh2?oc=5", "empresa": "Sindicatos dos Radialistas", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Sindicato dos Radialistas de São Paulo", "data": "22/07", "resumo": "<b>Sindicatos dos Radialistas</b> &middot; numero nao divulgado"}, {"titulo": "Demissões em massa no Xbox abalam a Bethesda e lançam sombras sobre The Elder Scrolls 6", "link": "https://news.google.com/rss/articles/CBMi4gFBVV95cUxNMzlaY2hRczhRcVJkWGtudnNHTW5ocnFmM2hpaFRsa3pLWFIzT0ZTTVNxa2dJX3hITnZMRk1jV0pNVVJLS0dtR2Nrb2huZDlOYnBoQ2hmMkZFU0l4Vks5SEwydW5udVlhMUdWTEZHZkphbjNUbEpKTW5iWFg4MTlBSEZRcm5HY2dtYWxXcTZteUhXanlWZlNoRXNCUTdvQ29icWw2M3J2Nm5wdWphc1pzMF9YSGlSWTRqWEUyb0xzZ0ZFSjZrWG9zVVNBdktUbGVKSGdiS211U25ROXlHSFdFbXdn0gHqAUFVX3lxTE1nY09jMUJtaHUtdk9rQ01MZDNESFhSZW5HdDhFQVE3dzRVbG5IWVU1eV9rUVEtZER6a2x0NmtleVRBeHNkcURpVXFPQWE4UlI1TEhXOUdSYnVXY2pSY1piYnhLMFZZMmxtOVBtMGdQSi1YalhDdjVBYTFUeU1jMXZaa1E5cWlqbFVEVTQtU2pVU3hXbWNsUW5HX1RVVzNQMjdXcVJySVp0X1RxbmNFVTJEdGpOWkVCcGlMNXFPMVAxX0VZMWtNWGwwZHJUT1F0MW5odjZ1NnJVMzB0R09TVDVibjhmNmhMY1lUdw?oc=5", "empresa": "The Elder Scrolls", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "GazetaWeb", "data": "21/07", "resumo": "<b>The Elder Scrolls</b> &middot; numero nao divulgado"}, {"titulo": "Fabricante de calçados com 25 mil trabalhadores fecha fábrica de 20 anos e demite funcionários", "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNVl9SLWJNcVRBcmhtVmpSSmVaV3ZMRlhmTThRWEZpbkRrUXlJNUQ3a2ZhUGtlT0p2Y1JzVjNSMWZfQ0dRTUtDU0k5cy1XaktzTkpXdGZKZ2VUUkZYSFZJMGpMNHFlbEVHUE5OOUpncjRwa3hVZHRlaXZWZ05NaWJsb3Ryc05TTHV5Z2w4YmNaRURvYXo4aXJEaGJqWHoxeTRDZEs0QVVteTBDVXhS?oc=5", "empresa": "Fabricante", "setor": "Industria e Automotivo", "destaque": false, "qtde": 25000, "uf": "", "veiculo": "Portal Tempo Novo", "data": "19/07", "resumo": "<b>Fabricante</b> &middot; 25.000 desligamentos"}, {"titulo": "CBF demite funcionários após Portal LeoDias vazar gastos de Samir Xaud", "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOc3pWWFcyMDZzcjZzdEw5OWMtaEU4S1lUd0w2M1JvakNHQURWanF0VkQyWVdycmo2Q2NlYk1mQXl5dVdzbmVlekhiRExkcGhpeHNrVVFYMUsyTXg1Z191UGlFWXVjd05XMU1XeDJtM2wxUHFRT1Y5U3RwSm81Q1NnSjN1ZnplaXdRd1dQcmNmeEtzNGMwaEpBeVgyaEpsQUNGd01rcTBfRmfSAa4BQVVfeXFMUFFSQUthZUN5eG1nOS1wRFdhbTFsMG13a09VMlpMOHNrZWtsOGtkdHBuUHY2OXdBdzZfblJhRWZ4Z3lkMVBMYzlFdFRobTdzbGg2cUowS1ZWOHlvZ0Izc0ZjOXgwVTFURkZ3WnhsMTlFSTNOTDFwOHM1c29mN3lvdmxYVDZBZzZWTGJaazUzbGN6czdnSERHX1RjNE82MEZhdnpkaFptUlpZWGtTTmx3?oc=5", "empresa": "CBF", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "portalleodias.com", "data": "16/07", "resumo": "<b>CBF</b> &middot; numero nao divulgado"}, {"titulo": "Até 100 mil empregos: Gigante do setor automotivo prepara demissão em massa e explica futuro no Brasil", "link": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE1LY1puNVpUeDYybXZUU3p2TDQ4dHU4WEtVYUNKRF9YTjMzdGJudjltVi1oQy15UVpocUJzaGlUMzFlMG9fNjlBNzRtUy1RaV9yY2w3bkpiWFFlWUxVaFRTNVAtSHBGWTUz?oc=5", "empresa": "(nao identificada)", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Revista Fórum", "data": "15/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "Sucesso de Assassin's Creed Black Flag não impede demissões em massa", "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxOVl84c2EyOXljSVZHc0pUdHpJUldsYVBTaWtZUS16dmFVUzV1R2V3anN2Wm1aVk9UZTRfMmdfWE1NZTFNZE1MVmRUNVF1ZlhMWmNhcVlwZlJLUXhNNGhqT3NDT29nZFBYQWNCck1jYjAzSWlnTk5rb0FHT3MzbDJic2VqY3BxVi16SHZ1Z210ZHV4NkoxcnVFazB4Wlh5ZmQx?oc=5", "empresa": "Sucesso de Assassin's Creed Black", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Canaltech", "data": "15/07", "resumo": "<b>Sucesso de Assassin&#x27;s Creed Black</b> &middot; numero nao divulgado"}, {"titulo": "Economistas e 15 vencedores do Nobel alertam sobre IA causar demissão em massa e cobram medidas", "link": "https://news.google.com/rss/articles/CBMi2wFBVV95cUxPQzh6SVdFRFBybTNrV2RyVHl6b1VjOF9jT1R0Y2puYTJJREtxOHBjRTNSUTdTVmdHTll2allZVXI2T3Q3Y0t6dkVlSnM0WXlMSlprZFhVcXBmdXlmZnQ0SEEya0QwMkJJMzJDaDhsSTdCbGVicUpUTEZJcnQ0N0Zoakt1STdyMjkxdjBXVGFzbnZDZm9BRXZJamRMd0V0eUJ3MHBIenBfMnl5RDhhUG5Vbm42MW03LU83RWFkVVMyUEg4bFNoVnFjdjRhVjZqTkdRYWdMZjhlQl9qT3c?oc=5", "empresa": "Economistas", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "veiculo": "Folha de S.Paulo", "data": "14/07", "resumo": "<b>Economistas</b> &middot; numero nao divulgado"}, {"titulo": "Maior rede de supermercados do Brasil fecha 29 lojas e demite mais de 6 mil funcionários em plano para reduzir custos", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOT25odmdjWlJJWHBxNTczSUJTS0Z1UmV2SGtTaWVFQnZoeFp5Nml4d04yRnNSVG9sZjZxQnhoVndnUW9OSXc4TTVWNGpKZ0Q5MFNoWXdRQXlJeVZDVHE3UGZrN1o5NkdEUlNJeWJBV1c2eVBWWFk0SlBaSHhXdktiMjFPenBMZFRrVGNjS21FNzFGOUU0VDZ2NnhjYVZBUUtQLUQ0?oc=5", "empresa": "Maior", "setor": "Varejo e Comercio", "destaque": false, "qtde": 6000, "uf": "PA", "veiculo": "Diário do Litoral", "data": "13/07", "resumo": "<b>Maior</b> &middot; 6.000 desligamentos &middot; PA"}, {"titulo": "Volkswagen planeja demissões em massa", "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNUjVnUTNNV01IcjJNQlBtMXQ4bTgtMkNRbEJKS1JKaWNkQUlNV3cwY1dMZnlWTEs3bUt6dnV3X29BZmYtdzY1elVQWjZlY1dZbFg1anBXLXhNSjlrYXV5cTdMckdRVXlRWmVVVlljcFdvdG12V1pCMXNmeGNsYVBNQzlHd1VoTWU2bHfSAZIBQVVfeXFMTUE0YlVJWkRuVUtsanNWTW55TFM3VmpZaWpZMVU4T0xmbnUyRnVuY2lHX3MwUUd6N0p0aEpOd1dBTGlFZ2k3OTFhSEpZYmZIQ0VmcEJwcXl5VWJXR2FlQUJWT0oxdE8zR0tYcjlVeThWWUlsem1lLXNyQ1ljTTJkY0dycHNvVUE0bTNxSGE1VlFsbUE?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Gazeta Brasil", "data": "13/07", "resumo": "<b>Volkswagen</b> &middot; numero nao divulgado"}, {"titulo": "CAFÉ COM MOÍDO | Demissões em massa na TV Borborema/SBT", "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPbXR5SDcxcTFtbjRfQm14R2s2bHdBY1EwVmpsNi05LXRWQ1E5bXNILU1scTdYeWtOMGRyNm9lSzBiY2lseVp3c3o2eUhDYVJveE9ucW1GZnQxQXRlVjV4Q1d1d2M5N2J0bGFDRnVqTThHcUVfVXEzZEY1Y0VHVXlCeFRMVFNOZVpOUE96R1VRSDlIemVfa0tyeTFGdTYtSENj?oc=5", "empresa": "Sbt", "setor": "Telecom e Midia", "destaque": false, "qtde": null, "uf": "", "veiculo": "Blog do Márcio Rangel", "data": "13/07", "resumo": "<b>Sbt</b> &middot; numero nao divulgado"}, {"titulo": "Grande marca de calçados fecha fábrica tradicional e provoca demissão em massa", "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQYUE5V0JFaVR2NmVyY1JwSDhNODJRY1p6SlZiRl9jVUlkdk0xUV94UkY3cXEzWVRoRmNqUDdsOTR3elpPR1hud1QyZWVTQjRWZThEdTdXWG5zWDAtYjFERGphYXh0VkI4aDBON2VNbUY0OElhQjgzQTFnMXN3dlRaMXB3MWVEd3NrN2R3T20zOGxuT0pCY3RMZG82VFYwM2g0eGk1dFd5bk9PYThVbnJNcXJHaVF0eFNQazVncC1ydlRSQmE5aFFlSmRtYjdfZm04LVHSAdcBQVVfeXFMT3VOVGpTaGpNZTFwZU9YaVU0WTI0Q1N6UmUtS2Jab2I3c3JpUlEzN3k0eVV5WlhRd3dKTUM4anNuYjU2TW05WmRlSHdCZUh6djVCbE8wQXpSdHk5eU1LU1FWOVEwYjRYS1FQZWZCem82aXlmMEdKaE5RbC1ERHBfNlpaVGFxbTlDWnhVMHZBSFJINlo0LUljZ0tNRWtQWDBTdGcwRUZVLVdOMjdIWGcwSG96N0lKMFpfNk1HMGRueWMwRG1xR19SZzBPeTRuY0dkWldtcGo3b0k?oc=5", "empresa": "Grande", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "bnews.com.br", "data": "13/07", "resumo": "<b>Grande</b> &middot; numero nao divulgado"}, {"titulo": "\"Com as contas no vermelho\": Lojas Americanas demite mais de 4 mil funcionários", "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNNUNuSGx4YW9SbnJVMHY0VDdQT1NhZnJ6d09la1BNSjFpblVFd1NkUTZwQXJ6amZXM1RlUmZvenpHZGhVRms1TmlsNzBvZXQxNUxxWXZJd0wwMy1EVVU5NkVwUkJjYUx5OTRUVUxyNWh6SWZEalc3aEhnZk93Vm45eG5pM3I3VWVzVmFrODVVRXJPT0FQZUdsUHhkUjhGSW5NQkxZNzR5VEJ3cWp3ODR5Qg?oc=5", "empresa": "Americanas", "setor": "Varejo e Comercio", "destaque": false, "qtde": 4000, "uf": "", "veiculo": "Agência GBC", "data": "12/07", "resumo": "<b>Americanas</b> &middot; 4.000 desligamentos"}];
+const DESTAQUE = "Energia Eletrica";
+
+const elBusca = document.getElementById('busca');
+const elSetor = document.getElementById('setor');
+const elAchados = document.getElementById('achados');
+
+elSetor.innerHTML = '<option value="">TODOS OS SETORES</option>' +
+  [...new Set(DADOS.map(d => d.setor))].sort()
+    .map(s => `<option value="${s}">${s.toUpperCase()}</option>`).join('');
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function linha(d, i) {
+  const tags = [`<span class="tag setor">${esc(d.setor)}</span>`];
+  if (d.qtde != null)
+    tags.push(`<span class="tag pessoas">${Number(d.qtde).toLocaleString('pt-BR')} PESSOAS</span>`);
+  if (d.uf) tags.push(`<span class="tag">${esc(d.uf)}</span>`);
+
+  return `<li class="${d.destaque ? 'destaque' : ''}" style="animation-delay:${Math.min(i*26,520)}ms">
+    <div class="hora">${esc(d.data)}</div>
+    <p class="manchete"><a href="${esc(d.link)}" target="_blank" rel="noopener">${esc(d.titulo)}</a></p>
+    <p class="resumo">${d.resumo}</p>
+    <div class="tags">${tags.join('')}
+      <a class="ir" href="${esc(d.link)}" target="_blank" rel="noopener">${esc(d.veiculo)}</a>
+    </div>
+  </li>`;
+}
+
+function render() {
+  const q = elBusca.value.trim().toLowerCase();
+  const s = elSetor.value;
+  const vis = DADOS.filter(d =>
+    (!s || d.setor === s) &&
+    (!q || (d.empresa+' '+d.titulo+' '+d.veiculo+' '+d.setor).toLowerCase().includes(q)));
+
+  const ele = vis.filter(d => d.destaque);
+  const out = vis.filter(d => !d.destaque);
+
+  document.getElementById('lista-ele').innerHTML = ele.length
+    ? ele.map(linha).join('')
+    : `<li class="vazio">Nenhuma partida no ${DESTAQUE} com os filtros atuais</li>`;
+  document.getElementById('lista-out').innerHTML = out.length
+    ? out.map(linha).join('')
+    : '<li class="vazio">Nada nos demais setores com os filtros atuais</li>';
+
+  document.getElementById('n-ele').textContent = ele.length;
+  document.getElementById('n-out').textContent = out.length;
+  elAchados.textContent = `${vis.length}/${DADOS.length}`;
+}
+
+elBusca.addEventListener('input', render);
+elSetor.addEventListener('change', render);
+render();
+
+// relogio vivo
+const elHora = document.getElementById('hora');
+function tique() {
+  elHora.textContent = new Date().toLocaleTimeString('pt-BR', {hour12:false});
+}
+tique(); setInterval(tique, 1000);
+</script>
+</body>
+</html>
