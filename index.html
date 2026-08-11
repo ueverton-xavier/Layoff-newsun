@@ -327,7 +327,7 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     </div>
     <div class="relogio">
       <div class="atualizado">Atualizado em</div>
-      <div class="carimbo mono">11/08/2026 &middot; 15:22</div>
+      <div class="carimbo mono">11/08/2026 &middot; 15:28</div>
       <div class="vivo"><span class="pisca"></span> Roda todo dia as 06:00</div>
     </div>
   </header>
@@ -394,7 +394,7 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     700 descartadas por ruido &mdash; materia
     explicativa, layoff fora do Brasil, checagem de fake news e resumo com varios
     assuntos; 19 duplicatas fundidas.<br>
-    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 15:22
+    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 15:28
   </p>
 
 </div>
@@ -414,17 +414,26 @@ const elAchados = document.getElementById('achados');
 const contaUf = {};
 DADOS.forEach(d => { if (d.uf) contaUf[d.uf] = (contaUf[d.uf] || 0) + 1; });
 const semUf = DADOS.filter(d => !d.uf).length;
-const ufs = Object.keys(contaUf).sort();
+const ufs = Object.keys(contaUf).sort((a, b) => {
+  if (a === 'SP') return -1;           // SP primeiro, como pedido
+  if (b === 'SP') return 1;
+  return a.localeCompare(b);
+});
 
 elUf.innerHTML =
   `<option value="">TODAS AS UFs (${DADOS.length})</option>` +
   ufs.map(u => `<option value="${u}">${u} (${contaUf[u]})</option>`).join('') +
   (semUf ? `<option value="__SEM__">SEM UF NA MATERIA (${semUf})</option>` : '');
 
-// Sao Paulo entra marcado por padrao (pedido do usuario), mas so se
-// houver registro de SP — senao o painel abriria vazio sem explicacao.
-const UF_PADRAO = 'SP';
-if (contaUf[UF_PADRAO]) elUf.value = UF_PADRAO;
+// O painel ABRE SEM FILTRO DE UF, de proposito.
+//
+// Deixar Sao Paulo travado por padrao foi testado e reprovado: so 48%
+// dos eventos tem UF identificada e SP costuma ter 2 ou 3, entao o
+// painel abria mostrando 2 de 15 e dava a impressao de estar quebrado.
+// Enquanto a cobertura de UF nao subir, filtro de estado e ferramenta
+// de consulta, nao estado inicial. SP fica como a primeira opcao da
+// lista, a um clique.
+const UF_PADRAO = '';
 
 elSetor.innerHTML = '<option value="">TODOS OS SETORES</option>' +
   [...new Set(DADOS.map(d => d.setor))].sort()
