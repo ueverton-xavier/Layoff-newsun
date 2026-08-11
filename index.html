@@ -123,6 +123,15 @@ body {
   content: "\25BC"; color: var(--ambar); font-size: .62rem;
 }
 .ticker-sep { color: var(--tinta-3); opacity: .5; }
+/* O resumo sai da fonte mono do letreiro e vai para a serifada, em
+   italico e caixa normal: separa "dado" de "assunto" sem precisar de
+   outra cor, que ja esta saturada de significado neste painel. */
+.ticker-item .tk-resumo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic; font-size: .86rem; letter-spacing: .01em;
+  text-transform: none; color: var(--tinta); opacity: .95;
+}
+.ticker-item.ele .tk-resumo { color: #ffd9a3; }
 
 @media (prefers-reduced-motion: reduce) {
   .ticker-trilha { animation: none; }
@@ -176,6 +185,7 @@ body {
 }
 .filtros input { flex: 1; min-width: 190px; }
 .filtros input::placeholder { color: var(--tinta-3); }
+.filtros .achados.filtrando { color: var(--ambar); font-weight: 700; }
 .filtros .achados {
   font-family: ui-monospace, Consolas, monospace; font-size: .72rem;
   letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-3);
@@ -310,13 +320,13 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     </div>
     <div class="relogio">
       <div class="atualizado">Atualizado em</div>
-      <div class="carimbo mono">11/08/2026 &middot; 12:37</div>
+      <div class="carimbo mono">11/08/2026 &middot; 14:42</div>
       <div class="vivo"><span class="pisca"></span> Roda todo dia as 06:00</div>
     </div>
   </header>
 
   <div class="ticker" aria-label="Ultimas demissoes em massa apuradas">
-    <div class="ticker-trilha" style="--dur:33s"><span class="ticker-item ele"><b>Enel</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Eletrobras Axia</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Enel</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica SP</span><span class="ticker-item ele"><b>Ge Vernova</b> <span class="n">1.000</span> desligados <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Gerdau</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Volkswagen</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Viana do Castelo</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Toshiba</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item ele"><b>Enel</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Eletrobras Axia</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Enel</b> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica SP</span><span class="ticker-item ele"><b>Ge Vernova</b> <span class="n">1.000</span> desligados <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Gerdau</b> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Volkswagen</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Viana do Castelo</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Toshiba</b> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span></div>
+    <div class="ticker-trilha" style="--dur:37s"><span class="ticker-item ele"><b>Enel</b> <i class="tk-resumo">Diretor da Aneel rejeita recurso da Enel SP em processo…</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Eletrobras Axia</b> <i class="tk-resumo">Demissões na Eletrobras Axia preocupam a categoria</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Enel</b> <i class="tk-resumo">Enel tenta evitar caducidade da concessão em São Paulo</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica SP</span><span class="ticker-item ele"><b>Ge Vernova</b> <i class="tk-resumo">GE Vernova fecha fábrica da LM Wind Power em Suape…</i> <span class="n">1.000</span> desligados <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Gerdau</b> <i class="tk-resumo">Gerdau encerra setores da unidade de Pernambuco e demite cerca…</i> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Volkswagen</b> <i class="tk-resumo">Crise global do Grupo Volkswagen leva Porsche a cortar 5…</i> <span class="n">5.000</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Volkswagen</b> <i class="tk-resumo">CEO da Volkswagen confirma fechamento de 4 fábricas e demissão…</i> <span class="n">100.000</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Viana do Castelo</b> <i class="tk-resumo">Gigante alemão das eólicas fecha fábrica em Viana do Castelo</i> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Toshiba</b> <i class="tk-resumo">Toshiba fecha fábrica no Brasil</i> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item ele"><b>Enel</b> <i class="tk-resumo">Diretor da Aneel rejeita recurso da Enel SP em processo…</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Eletrobras Axia</b> <i class="tk-resumo">Demissões na Eletrobras Axia preocupam a categoria</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica PA</span><span class="ticker-item ele"><b>Enel</b> <i class="tk-resumo">Enel tenta evitar caducidade da concessão em São Paulo</i> numero nao divulgado <span class="ticker-sep">|</span> Energia Eletrica SP</span><span class="ticker-item ele"><b>Ge Vernova</b> <i class="tk-resumo">GE Vernova fecha fábrica da LM Wind Power em Suape…</i> <span class="n">1.000</span> desligados <span class="ticker-sep">|</span> Energia Eletrica</span><span class="ticker-item"><b>Gerdau</b> <i class="tk-resumo">Gerdau encerra setores da unidade de Pernambuco e demite cerca…</i> <span class="n">160</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo PE</span><span class="ticker-item"><b>Volkswagen</b> <i class="tk-resumo">Crise global do Grupo Volkswagen leva Porsche a cortar 5…</i> <span class="n">5.000</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Volkswagen</b> <i class="tk-resumo">CEO da Volkswagen confirma fechamento de 4 fábricas e demissão…</i> <span class="n">100.000</span> desligados <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Viana do Castelo</b> <i class="tk-resumo">Gigante alemão das eólicas fecha fábrica em Viana do Castelo</i> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span><span class="ticker-item"><b>Toshiba</b> <i class="tk-resumo">Toshiba fecha fábrica no Brasil</i> numero nao divulgado <span class="ticker-sep">|</span> Industria e Automotivo</span></div>
   </div>
 
   <div class="contadores">
@@ -327,16 +337,17 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     </div>
     <div class="contador">
       <div class="rot">Setores proximos</div>
-      <div><span class="val">4</span><span class="un">partidas</span></div>
-      <div class="pe">160 pessoas desligadas</div>
+      <div><span class="val">5</span><span class="un">partidas</span></div>
+      <div class="pe">105.160 pessoas desligadas</div>
     </div>
   </div>
 
   <div class="filtros">
     <input id="busca" type="search" placeholder="Buscar empresa, setor, veiculo...">
     <select id="setor"></select>
+    <select id="uf"></select>
     <select id="estado">
-      <option value="">TODOS OS ESTADOS</option>
+      <option value="">TODA SITUACAO</option>
       <option value="CONFIRMADO">SO CONFIRMADO</option>
       <option value="ANTECEDENTE">SO SINAL ANTECEDENTE</option>
     </select>
@@ -355,29 +366,48 @@ a:focus-visible, input:focus-visible, select:focus-visible {
 
   <p class="rodape">
     <b>Como ler.</b> A coluna de pessoas so aparece quando a materia publica o
-    numero &mdash; nesta rodada, 2 de 9. Ausencia de numero nao
+    numero &mdash; nesta rodada, 4 de 10. Ausencia de numero nao
     significa desligamento pequeno, significa numero nao divulgado.<br>
     <b>Regra de pauta.</b> Fora do Energia Eletrica, so entra materia com
-    empresa E segmento identificados &mdash; 53 linha(s) ficaram de fora
+    empresa E segmento identificados &mdash; 54 linha(s) ficaram de fora
     por esse criterio nesta rodada. No setor em destaque entra tudo, mesmo sem
     empresa nomeada. Nada e apagado do banco.<br>
-    <b>Origem.</b> 748 noticias varridas em 19 feeds
+    <b>Origem.</b> 928 noticias varridas em 34 feeds
     (veiculos economicos, sindicatos do ramo eletrico e Google News);
-    659 descartadas por ruido &mdash; materia
+    844 descartadas por ruido &mdash; materia
     explicativa, layoff fora do Brasil, checagem de fake news e resumo com varios
-    assuntos; 19 duplicatas fundidas.<br>
-    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 12:37
+    assuntos; 20 duplicatas fundidas.<br>
+    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 14:42
   </p>
 
 </div>
 <script>
-const DADOS = [{"titulo": "Diretor da Aneel rejeita recurso da Enel SP em processo de caducidade", "link": "https://megawhat.uol.com.br/economia-e-politica/diretor-da-aneel-rejeita-recurso-da-enel-sp-em-processo-de-caducidade/", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "PA", "veiculo": "MegaWhat", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "score": 0.0, "data": "11/08", "resumo": "<b>Enel</b> &middot; numero nao divulgado &middot; PA &middot; atinge administrativo, diretor"}, {"titulo": "Demissões na Eletrobras Axia preocupam a categoria", "link": "https://www.sindinorte.org.br/demissoes-na-eletrobras-axia-preocupam-a-categoria/", "empresa": "Eletrobras Axia", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "PA", "veiculo": "Sindinorte", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "30/07", "resumo": "<b>Eletrobras Axia</b> &middot; numero nao divulgado &middot; PA"}, {"titulo": "Enel tenta evitar caducidade da concessão em São Paulo", "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBzaTN1M1d1QWc0cVdfQ01ZRFlQVkh3MGluODFzSWN3VHlPVkY3emNUSXA2ckVUZFgzOUJBY042b3hTU1hXOWR5emVXRndBaWU3M0tZS25FNG8wVWV5NTk0alZfQ1FxWm4ycmE5ZUln?oc=5", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "SP", "veiculo": "Giro S/A", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "score": 0.0, "data": "23/07", "resumo": "<b>Enel</b> &middot; numero nao divulgado &middot; SP"}, {"titulo": "Demissões em massa e a falta de investimentos tornam o sistema elétrico uma bomba relógio", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQYkNqSzY5SmJHeWk5WUMxOHpFcE4tOE9RRzlzMlA1WG5QblV5amFUQlAwc2doS1ZwVWkwa2I3U2FGT245NmNWbi1GazVIOWhja3ZGX01iVk9sU1pmeTVtMFd4ZDF4Mm0yMWhxaFhqdWFra0Zwakg1NHViTTVZbmwtdjA4TjRTR3F0dW1KNlluS0hzTmgzaHJSaHJrRTh0QWlTOC1fd2tSNXdrVWU0NXZESXh2QmVzbkVHbEo0UjFXZw?oc=5", "empresa": "(nao identificada)", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "veiculo": "fnucut.org.br", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "21/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado"}, {"titulo": "GE Vernova fecha fábrica da LM Wind Power em Suape com 1 mil demissões", "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOQjJUOVlUWnJ6YnVLWUd1ZEozcTZEelhsbnhNVlltTnJHTlhhZkJKa3R2eGwycE5oX3J0QU5UME91SDBNb3lUdXRhUTY4d3ZQRHNsZC1zYlhJeDdkYy13Y2k4VkxiYi1iTnUxaDZXZ2REcWN3d0FtMmkwUE8wQ2dRSHUxc3JoODdvM0NWUEI0ZWx0R0N3WXZmZmRla2xMSlJoS3EwWFM5LVo0a3NacGlmVjl5WkFhR3U4eWxnWVZ0X21lZw?oc=5", "empresa": "Ge Vernova", "setor": "Energia Eletrica", "destaque": true, "qtde": 1000, "uf": "", "veiculo": "megawhat.uol.com.br", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "10/02", "resumo": "<b>Ge Vernova</b> &middot; 1.000 desligamentos"}, {"titulo": "Gerdau encerra setores da unidade de Pernambuco e demite cerca de 160 trabalhadores", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOdURKMHhueTR3YnlkMUtscDRLc1RSMjl4Y1RBczlDQnRRNWVvNW1kYk1RQ3VGSloyTFNMM0o3OTYydldrZDJjU3pBZFdYV3NPcW50cFZ3eng1cmd1WWdpZHRzVEcxcnMzZW9SbVV4Nkp6V3ZORzRFZ3lLSlNHcDh3TGxqVUExNEdadExqQ2RHcjZyaHNmZlQ0OTJpZENtSkxOVDhtcWpKSjRkaWR5YmwzZkw3bU43VzR0dlNPUjBSbE1udFlqUVM0SzNhMmszTHhuZ2FOc3llY0tlZFJrS1NZdUl0ZlpuenM?oc=5", "empresa": "Gerdau", "setor": "Industria e Automotivo", "destaque": false, "qtde": 160, "uf": "PE", "veiculo": "Diario de Pernambuco", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "score": 0.8889, "data": "05/08", "resumo": "<b>Gerdau</b> &middot; 160 desligamentos &middot; PE"}, {"titulo": "Volkswagen planeja demissões em massa", "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNUjVnUTNNV01IcjJNQlBtMXQ4bTgtMkNRbEJKS1JKaWNkQUlNV3cwY1dMZnlWTEs3bUt6dnV3X29BZmYtdzY1elVQWjZlY1dZbFg1anBXLXhNSjlrYXV5cTdMckdRVXlRWmVVVlljcFdvdG12V1pCMXNmeGNsYVBNQzlHd1VoTWU2bHfSAZIBQVVfeXFMTUE0YlVJWkRuVUtsanNWTW55TFM3VmpZaWpZMVU4T0xmbnUyRnVuY2lHX3MwUUd6N0p0aEpOd1dBTGlFZ2k3OTFhSEpZYmZIQ0VmcEJwcXl5VWJXR2FlQUJWT0oxdE8zR0tYcjlVeThWWUlsem1lLXNyQ1ljTTJkY0dycHNvVUE0bTNxSGE1VlFsbUE?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Gazeta Brasil", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "score": 0.1244, "data": "13/07", "resumo": "<b>Volkswagen</b> &middot; numero nao divulgado"}, {"titulo": "Gigante alemão das eólicas fecha fábrica em Viana do Castelo", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPM29NR1BwWnJnQWwwWl9hWVpnSk0wVl9VblBkbXgwSkxPdVVDUmFJLVNXaG00czR3QVRlTFFvUUprY2FHNGpfaXBQWXhTTjBRZFgyelByX01QZkR2emQ2eUx5NzJ4anhSSVNicTU2cktNc3RGeEh1bU5LQkpBNEtoM1ZGMUNwRDF2VHhQLUp0QnpLczlDZkNzT09zdm1yX2Z2bmVBOA?oc=5", "empresa": "Viana do Castelo", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Jornal Económico", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "score": 0.105, "data": "27/02", "resumo": "<b>Viana do Castelo</b> &middot; numero nao divulgado"}, {"titulo": "Toshiba fecha fábrica no Brasil", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBlSXBvOG02S2ZKRUFUSm5GN3o2dmRDVFdDTTJlVjFCUDRSNEtITXNndl9ZLTdEc09DbFVfUy1CVm5TYU55U0J6QmM0UHl1Sm1NT05VOHZWd2xrNlcyTDc0aVpmRjVJejlmTUtJdC1IOHM1WEFHWXl30gF8QVVfeXFMTmFCXzJIN1lvT1dCQi1OckhFZHFVbzhETHljRmlVWUZXbEpvZ1ZXTV9zMjBLb0dfMEEwOHoycENZclFMM2lTQ1VWNnJCcHlBbVZ6WjBRQ3k5YmNLSUxrMkMyWFVvcVB2RllkR0NsZW5tTTJzWUNMbFdUWlptZg?oc=5", "empresa": "Toshiba", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Estadão", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "score": 0.105, "data": "02/04", "resumo": "<b>Toshiba</b> &middot; numero nao divulgado"}];
+const DADOS = [{"titulo": "Diretor da Aneel rejeita recurso da Enel SP em processo de caducidade", "link": "https://megawhat.uol.com.br/economia-e-politica/diretor-da-aneel-rejeita-recurso-da-enel-sp-em-processo-de-caducidade/", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "PA", "veiculo": "MegaWhat", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "score": 0.0, "data": "11/08", "resumo": "<b>Enel</b> &middot; numero nao divulgado &middot; PA &middot; atinge administrativo, diretor", "resumo_curto": "Diretor da Aneel rejeita recurso da Enel SP em processo…"}, {"titulo": "Demissões na Eletrobras Axia preocupam a categoria", "link": "https://www.sindinorte.org.br/demissoes-na-eletrobras-axia-preocupam-a-categoria/", "empresa": "Eletrobras Axia", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "PA", "veiculo": "Sindinorte", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "30/07", "resumo": "<b>Eletrobras Axia</b> &middot; numero nao divulgado &middot; PA", "resumo_curto": "Demissões na Eletrobras Axia preocupam a categoria"}, {"titulo": "Enel tenta evitar caducidade da concessão em São Paulo", "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBzaTN1M1d1QWc0cVdfQ01ZRFlQVkh3MGluODFzSWN3VHlPVkY3emNUSXA2ckVUZFgzOUJBY042b3hTU1hXOWR5emVXRndBaWU3M0tZS25FNG8wVWV5NTk0alZfQ1FxWm4ycmE5ZUln?oc=5", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "SP", "veiculo": "Giro S/A", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "score": 0.0, "data": "23/07", "resumo": "<b>Enel</b> &middot; numero nao divulgado &middot; SP", "resumo_curto": "Enel tenta evitar caducidade da concessão em São Paulo"}, {"titulo": "Demissões em massa e a falta de investimentos tornam o sistema elétrico uma bomba relógio", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQYkNqSzY5SmJHeWk5WUMxOHpFcE4tOE9RRzlzMlA1WG5QblV5amFUQlAwc2doS1ZwVWkwa2I3U2FGT245NmNWbi1GazVIOWhja3ZGX01iVk9sU1pmeTVtMFd4ZDF4Mm0yMWhxaFhqdWFra0Zwakg1NHViTTVZbmwtdjA4TjRTR3F0dW1KNlluS0hzTmgzaHJSaHJrRTh0QWlTOC1fd2tSNXdrVWU0NXZESXh2QmVzbkVHbEo0UjFXZw?oc=5", "empresa": "(nao identificada)", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "veiculo": "fnucut.org.br", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "21/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado", "resumo_curto": "Demissões em massa e a falta de investimentos tornam o…"}, {"titulo": "GE Vernova fecha fábrica da LM Wind Power em Suape com 1 mil demissões", "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOQjJUOVlUWnJ6YnVLWUd1ZEozcTZEelhsbnhNVlltTnJHTlhhZkJKa3R2eGwycE5oX3J0QU5UME91SDBNb3lUdXRhUTY4d3ZQRHNsZC1zYlhJeDdkYy13Y2k4VkxiYi1iTnUxaDZXZ2REcWN3d0FtMmkwUE8wQ2dRSHUxc3JoODdvM0NWUEI0ZWx0R0N3WXZmZmRla2xMSlJoS3EwWFM5LVo0a3NacGlmVjl5WkFhR3U4eWxnWVZ0X21lZw?oc=5", "empresa": "Ge Vernova", "setor": "Energia Eletrica", "destaque": true, "qtde": 1000, "uf": "", "veiculo": "MegaWhat", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "score": 0.0, "data": "10/02", "resumo": "<b>Ge Vernova</b> &middot; 1.000 desligamentos", "resumo_curto": "GE Vernova fecha fábrica da LM Wind Power em Suape…"}, {"titulo": "Gerdau encerra setores da unidade de Pernambuco e demite cerca de 160 trabalhadores", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOdURKMHhueTR3YnlkMUtscDRLc1RSMjl4Y1RBczlDQnRRNWVvNW1kYk1RQ3VGSloyTFNMM0o3OTYydldrZDJjU3pBZFdYV3NPcW50cFZ3eng1cmd1WWdpZHRzVEcxcnMzZW9SbVV4Nkp6V3ZORzRFZ3lLSlNHcDh3TGxqVUExNEdadExqQ2RHcjZyaHNmZlQ0OTJpZENtSkxOVDhtcWpKSjRkaWR5YmwzZkw3bU43VzR0dlNPUjBSbE1udFlqUVM0SzNhMmszTHhuZ2FOc3llY0tlZFJrS1NZdUl0ZlpuenM?oc=5", "empresa": "Gerdau", "setor": "Industria e Automotivo", "destaque": false, "qtde": 160, "uf": "PE", "veiculo": "Diario de Pernambuco", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "score": 0.8889, "data": "05/08", "resumo": "<b>Gerdau</b> &middot; 160 desligamentos &middot; PE", "resumo_curto": "Gerdau encerra setores da unidade de Pernambuco e demite cerca…"}, {"titulo": "Crise global do Grupo Volkswagen leva Porsche a cortar 5 mil postos de trabalho e reduzir salários", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPb1NNbTB2b2U5NWhRUlItSW5SbEtvTFpzTTJzS2M3YjRWSENtdnBpRTRNRFp0VWU5UnBOeDdfRkJkYVhQaWNFcGNxWHlFRnhWUHZCbEFmMVYxaGVtVndTU0szd0NKSV9RVHBPOVNaa1FEYlN1cXVQWEhOYmlOMzM0NEs5QWdFNjg3alZCd0MxVzgyMVVRb0xWVzlsXzB3NGxScmU4?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": 5000, "uf": "", "veiculo": "ND Mais", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "score": 0.7333, "data": "30/07", "resumo": "<b>Volkswagen</b> &middot; 5.000 desligamentos", "resumo_curto": "Crise global do Grupo Volkswagen leva Porsche a cortar 5…"}, {"titulo": "CEO da Volkswagen confirma fechamento de 4 fábricas e demissão de 100 mil funcionários em meio a fortes protestos de trabalhadores", "link": "https://news.google.com/rss/articles/CBMif0FVX3lxTFB5WkNDSnNoRFBfOTN6REllN3A3U25EbW1LNlF0ei10NFphZFJmSXFUcklWamJTUnFXU054N1pFYzBDM2JRSGhGZlFxZmRFNTVJdko4c2NhLXBqdXpDNjZUd2NaQzFpcTJWTElVdElDMG1MSXZnOXR4d3A0U2xid1E?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": 100000, "uf": "", "veiculo": "ND Mais", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "score": 0.3556, "data": "13/07", "resumo": "<b>Volkswagen</b> &middot; 100.000 desligamentos", "resumo_curto": "CEO da Volkswagen confirma fechamento de 4 fábricas e demissão…"}, {"titulo": "Gigante alemão das eólicas fecha fábrica em Viana do Castelo", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPM29NR1BwWnJnQWwwWl9hWVpnSk0wVl9VblBkbXgwSkxPdVVDUmFJLVNXaG00czR3QVRlTFFvUUprY2FHNGpfaXBQWXhTTjBRZFgyelByX01QZkR2emQ2eUx5NzJ4anhSSVNicTU2cktNc3RGeEh1bU5LQkpBNEtoM1ZGMUNwRDF2VHhQLUp0QnpLczlDZkNzT09zdm1yX2Z2bmVBOA?oc=5", "empresa": "Viana do Castelo", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Jornal Económico", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "score": 0.105, "data": "27/02", "resumo": "<b>Viana do Castelo</b> &middot; numero nao divulgado", "resumo_curto": "Gigante alemão das eólicas fecha fábrica em Viana do Castelo"}, {"titulo": "Toshiba fecha fábrica no Brasil", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBlSXBvOG02S2ZKRUFUSm5GN3o2dmRDVFdDTTJlVjFCUDRSNEtITXNndl9ZLTdEc09DbFVfUy1CVm5TYU55U0J6QmM0UHl1Sm1NT05VOHZWd2xrNlcyTDc0aVpmRjVJejlmTUtJdC1IOHM1WEFHWXl30gF8QVVfeXFMTmFCXzJIN1lvT1dCQi1OckhFZHFVbzhETHljRmlVWUZXbEpvZ1ZXTV9zMjBLb0dfMEEwOHoycENZclFMM2lTQ1VWNnJCcHlBbVZ6WjBRQ3k5YmNLSUxrMkMyWFVvcVB2RllkR0NsZW5tTTJzWUNMbFdUWlptZg?oc=5", "empresa": "Toshiba", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "veiculo": "Estadão", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "score": 0.105, "data": "02/04", "resumo": "<b>Toshiba</b> &middot; numero nao divulgado", "resumo_curto": "Toshiba fecha fábrica no Brasil"}];
 const DESTAQUE = "Energia Eletrica";
 
 const elBusca = document.getElementById('busca');
 const elSetor = document.getElementById('setor');
 const elEstado = document.getElementById('estado');
+const elUf = document.getElementById('uf');
 const elAchados = document.getElementById('achados');
+
+// So as UFs que realmente aparecem nos dados — select com 27 opcoes
+// onde 24 nunca casam nada so atrapalha. O contador ao lado de cada
+// uma evita a duvida de "filtrei e sumiu tudo, sera que quebrou?".
+const contaUf = {};
+DADOS.forEach(d => { if (d.uf) contaUf[d.uf] = (contaUf[d.uf] || 0) + 1; });
+const semUf = DADOS.filter(d => !d.uf).length;
+const ufs = Object.keys(contaUf).sort();
+
+elUf.innerHTML =
+  `<option value="">TODAS AS UFs (${DADOS.length})</option>` +
+  ufs.map(u => `<option value="${u}">${u} (${contaUf[u]})</option>`).join('') +
+  (semUf ? `<option value="__SEM__">SEM UF NA MATERIA (${semUf})</option>` : '');
+
+// Sao Paulo entra marcado por padrao (pedido do usuario), mas so se
+// houver registro de SP — senao o painel abriria vazio sem explicacao.
+const UF_PADRAO = 'SP';
+if (contaUf[UF_PADRAO]) elUf.value = UF_PADRAO;
 
 elSetor.innerHTML = '<option value="">TODOS OS SETORES</option>' +
   [...new Set(DADOS.map(d => d.setor))].sort()
@@ -411,9 +441,11 @@ function render() {
   const q = elBusca.value.trim().toLowerCase();
   const s = elSetor.value;
   const est = elEstado.value;
+  const uf = elUf.value;
   const vis = DADOS.filter(d =>
     (!s || d.setor === s) &&
     (!est || d.estado === est) &&
+    (!uf || (uf === '__SEM__' ? !d.uf : d.uf === uf)) &&
     (!q || (d.empresa+' '+d.titulo+' '+d.veiculo+' '+d.setor).toLowerCase().includes(q)));
 
   const ele = vis.filter(d => d.destaque);
@@ -428,12 +460,17 @@ function render() {
 
   document.getElementById('n-ele').textContent = ele.length;
   document.getElementById('n-out').textContent = out.length;
-  elAchados.textContent = `${vis.length}/${DADOS.length}`;
+  const filtrando = !!(s || est || uf || q);
+  elAchados.textContent = filtrando
+    ? `${vis.length} de ${DADOS.length} — filtro ativo`
+    : `${vis.length} registros`;
+  elAchados.classList.toggle('filtrando', filtrando);
 }
 
 elBusca.addEventListener('input', render);
 elSetor.addEventListener('change', render);
 elEstado.addEventListener('change', render);
+elUf.addEventListener('change', render);
 render();
 </script>
 </body>
