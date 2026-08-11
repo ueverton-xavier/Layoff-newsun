@@ -280,6 +280,12 @@ li.destaque .hora { color: var(--ambar); }
   border-style: dashed;
 }
 .setor-titulo.verificar { color: var(--tinta-3); }
+.setor-titulo.pessoas { color: #7fd4c1; }
+.setor-titulo.pessoas::after { background: rgba(127,212,193,.3); }
+.nota-secao code {
+  font-family: ui-monospace, Consolas, monospace; font-size: .95em;
+  color: var(--ambar-claro);
+}
 .setor-titulo.verificar::after { background: var(--linha); }
 .nota-secao {
   font-size: .78rem; color: var(--tinta-3); margin: 0 0 10px;
@@ -332,7 +338,7 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     </div>
     <div class="relogio">
       <div class="atualizado">Atualizado em</div>
-      <div class="carimbo mono">11/08/2026 &middot; 16:15</div>
+      <div class="carimbo mono">11/08/2026 &middot; 16:51</div>
       <div class="vivo"><span class="pisca"></span> Roda todo dia as 06:00</div>
     </div>
   </header>
@@ -386,6 +392,19 @@ a:focus-visible, input:focus-visible, select:focus-visible {
   </p>
   <ul class="linhas" id="lista-ver"></ul>
 
+  <div class="setor-titulo pessoas">
+    Profissionais do setor &mdash; entrada manual <span class="n" id="n-pessoas"></span>
+  </div>
+  <p class="nota-secao">
+    Alimentada a mao, a partir do que voce encontrar navegando (LinkedIn,
+    conversa, indicacao). O robo nao raspa perfil de terceiro: automatizar
+    isso contornando o controle da plataforma poria a sua conta real em
+    risco. Para incluir, edite <code>entradas_manuais.csv</code>.
+    O nome da pessoa fica so no arquivo local &mdash; aqui saem empresa,
+    cargo e UF.
+  </p>
+  <ul class="linhas" id="lista-pessoas"></ul>
+
   <p class="rodape">
     <b>Como ler.</b> A coluna de pessoas so aparece quando a materia publica o
     numero &mdash; nesta rodada, 5 de 17. Ausencia de numero nao
@@ -394,18 +413,19 @@ a:focus-visible, input:focus-visible, select:focus-visible {
     empresa E segmento identificados &mdash; 48 linha(s) ficaram de fora
     por esse criterio nesta rodada. No setor em destaque entra tudo, mesmo sem
     empresa nomeada. Nada e apagado do banco.<br>
-    <b>Origem.</b> 1025 noticias varridas em 34 feeds
+    <b>Origem.</b> 993 noticias varridas em 34 feeds
     (veiculos economicos, sindicatos do ramo eletrico e Google News);
     900 descartadas por ruido &mdash; materia
     explicativa, layoff fora do Brasil, checagem de fake news e resumo com varios
     assuntos; 22 duplicatas fundidas.<br>
-    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 16:15
+    <b>Mercado de Layoff</b> &middot; atualizado em 11/08/2026 as 16:51
   </p>
 
 </div>
 <script>
 const DADOS = [{"titulo": "Aneel avalia caducidade da concessão da Enel SP em reunião importante", "link": "https://news.google.com/rss/articles/CBMigAFBVV95cUxOTGM1LW4xcS1vSHVWMHF6cVpaMjk1anFmYTlnTWhDUjZaM0p4aUtHMjNEbWVzR2x0QkNoRDZqSXRkNG1Ua25xb0Z3X2w5bzdKVUdiRHM2T2g0VUJnNnFabWZmZXZrLWZxc1NGd2xLSFBWVDd6ejhxeHR4QV9BdDc1aw?oc=5", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "boca.com.br", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "10/08", "resumo": "<b>Enel</b> &middot; numero nao divulgado", "resumo_curto": "Aneel avalia caducidade da concessão da Enel SP em reunião…"}, {"titulo": "Projeto no Congresso abre caminho para corte de até 32% na conta de luz residencial", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQTzBUY2ZvNi1MOWdyNkwwdXd0UUt2RGxEYzJRUnJWX1NydHJtUXJMMFVtLXlVM2RWNUcxS1g4ckVONkZ5N1FzNmQ5Vk95R3hhVFFoc054Z043VTlHRENNakZjeXBNLUprcE04MTg0bTlnLVFrNlBoWlNxX2FET3FvOTk4LVdidFA4Y25wYTJRcTgyWkZjNnZUVmZpQzZKcXZxVHhhOHhnaEx0dV9NRDZ5ZzdyT2gtalJOZW51dA?oc=5", "empresa": "Congresso", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "SP", "uf_metodo": "estado citado", "veiculo": "Gazeta de São Paulo", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "04/08", "resumo": "<b>Congresso</b> &middot; numero nao divulgado &middot; SP", "resumo_curto": "Projeto no Congresso abre caminho para corte de até 32%…"}, {"titulo": "Demissões na Eletrobras Axia preocupam a categoria", "link": "https://www.sindinorte.org.br/demissoes-na-eletrobras-axia-preocupam-a-categoria/", "empresa": "Eletrobras Axia", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Sindinorte", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "30/07", "resumo": "<b>Eletrobras Axia</b> &middot; numero nao divulgado", "resumo_curto": "Demissões na Eletrobras Axia preocupam a categoria"}, {"titulo": "Enel tenta evitar caducidade da concessão em São Paulo", "link": "https://news.google.com/rss/articles/CBMibkFVX3lxTFBzaTN1M1d1QWc0cVdfQ01ZRFlQVkh3MGluODFzSWN3VHlPVkY3emNUSXA2ckVUZFgzOUJBY042b3hTU1hXOWR5emVXRndBaWU3M0tZS25FNG8wVWV5NTk0alZfQ1FxWm4ycmE5ZUln?oc=5", "empresa": "Enel", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "SP", "uf_metodo": "estado citado", "veiculo": "Giro S/A", "estado": "ANTECEDENTE", "antecedente": true, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "23/07", "resumo": "<b>Enel</b> &middot; numero nao divulgado &middot; SP", "resumo_curto": "Enel tenta evitar caducidade da concessão em São Paulo"}, {"titulo": "Demissões em massa e a falta de investimentos tornam o sistema elétrico uma bomba relógio", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxQYkNqSzY5SmJHeWk5WUMxOHpFcE4tOE9RRzlzMlA1WG5QblV5amFUQlAwc2doS1ZwVWkwa2I3U2FGT245NmNWbi1GazVIOWhja3ZGX01iVk9sU1pmeTVtMFd4ZDF4Mm0yMWhxaFhqdWFra0Zwakg1NHViTTVZbmwtdjA4TjRTR3F0dW1KNlluS0hzTmgzaHJSaHJrRTh0QWlTOC1fd2tSNXdrVWU0NXZESXh2QmVzbkVHbEo0UjFXZw?oc=5", "empresa": "(nao identificada)", "setor": "Energia Eletrica", "destaque": true, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "fnucut.org.br", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "21/07", "resumo": "<b>Empresa nao nomeada na materia</b> &middot; numero nao divulgado", "resumo_curto": "Demissões em massa e a falta de investimentos tornam o…"}, {"titulo": "GE Vernova fecha fábrica da LM Wind Power em Suape com 1 mil demissões", "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOQjJUOVlUWnJ6YnVLWUd1ZEozcTZEelhsbnhNVlltTnJHTlhhZkJKa3R2eGwycE5oX3J0QU5UME91SDBNb3lUdXRhUTY4d3ZQRHNsZC1zYlhJeDdkYy13Y2k4VkxiYi1iTnUxaDZXZ2REcWN3d0FtMmkwUE8wQ2dRSHUxc3JoODdvM0NWUEI0ZWx0R0N3WXZmZmRla2xMSlJoS3EwWFM5LVo0a3NacGlmVjl5WkFhR3U4eWxnWVZ0X21lZw?oc=5", "empresa": "Ge Vernova", "setor": "Energia Eletrica", "destaque": true, "qtde": 1000, "uf": "PE", "uf_metodo": "polo industrial (suape)", "veiculo": "MegaWhat", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "FORA", "proximidade": "NUCLEO", "verificar": false, "score": 0.0, "data": "10/02", "resumo": "<b>Ge Vernova</b> &middot; 1.000 desligamentos &middot; PE", "resumo_curto": "GE Vernova fecha fábrica da LM Wind Power em Suape…"}, {"titulo": "Apex nega demissão em massa dos funcionários e diz que números da crise são especulações", "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQeXRQQ1JBcGhWUGNvZzFBcXNxb2N3dVBYYndIWUlvSWRPa3Bqc182U3duUDFzVllRdEV4N0dnVWwxaS1aajBBM3lKUXkybS1iRzhYUGttYXRrZS13ZmsxdW00MWVXbmRkV1pEQU85RUR1UFRCVzVEbXJNVlBaUURWZmVPbGhmYXpQMnhVTWx3T0tjaXpLcmFkd0JxbVZwX201bG1sdVhiSFNGc3ZTMkRWRl9NbnlLYnZLT0kxcDVlLUNPU09HcFlNM1Fn?oc=5", "empresa": "Apex", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Folha Vitória", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.0875, "data": "10/08", "resumo": "<b>Apex</b> &middot; numero nao divulgado", "resumo_curto": "Apex nega demissão em massa dos funcionários e diz que…"}, {"titulo": "Criadores de GTA 6 fundam sindicato após demissões em massa na Rockstar", "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNeVhCQnZ1WHNaa1JaSVRoSFlKRk1ZY1JHeWtfYnhYUUNMbE5MUTdEU3NNTTNVSGhNVTFMcGhENUtiYVlQYVlGekFpd0RZcjRxZEo1T3BvMWlXWllMVHRkS1B3bW5VTlBrU2JaSEFTcWpHX2hpRWhPbmRIX0h6UEJlSUMyYzNsZlVYVG5TVjhwSHc1U1BkQnVRdXlKNHZnRmpSZ1pRZDJGS2FLZVNmak0w0gG0AUFVX3lxTFBNelR6eDZtMEJNWjdhMTBFaHp5X0I1VExaclVoamtDVWtCR2dHcU4wTHFZNFlnblp2X0FpeExHMHg5YTA1YmNHNHlZeUJlNkR6c3NEdlFZQjlHZGNOUHRrYzN1bjZ5Umhnalp5N3RmRHIyNW0ybXRSbEh5WEFMQzR4OVh1a25sVEdUZDJCMlFxck5ITVE3eGM5TEFTbTlyN3hLXzlQcnhlY2o3dlVxSGhYc2VDTw?oc=5", "empresa": "Rockstar", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Mix Vale", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.0836, "data": "09/08", "resumo": "<b>Rockstar</b> &middot; numero nao divulgado", "resumo_curto": "Criadores de GTA 6 fundam sindicato após demissões em massa…"}, {"titulo": "Gerdau encerra setores da unidade de Pernambuco e demite cerca de 160 trabalhadores", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOdURKMHhueTR3YnlkMUtscDRLc1RSMjl4Y1RBczlDQnRRNWVvNW1kYk1RQ3VGSloyTFNMM0o3OTYydldrZDJjU3pBZFdYV3NPcW50cFZ3eng1cmd1WWdpZHRzVEcxcnMzZW9SbVV4Nkp6V3ZORzRFZ3lLSlNHcDh3TGxqVUExNEdadExqQ2RHcjZyaHNmZlQ0OTJpZENtSkxOVDhtcWpKSjRkaWR5YmwzZkw3bU43VzR0dlNPUjBSbE1udFlqUVM0SzNhMmszTHhuZ2FOc3llY0tlZFJrS1NZdUl0ZlpuenM?oc=5", "empresa": "Gerdau", "setor": "Industria e Automotivo", "destaque": false, "qtde": 160, "uf": "PE", "uf_metodo": "estado citado", "veiculo": "Diario de Pernambuco", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "proximidade": "PROXIMO", "verificar": false, "score": 0.8889, "data": "05/08", "resumo": "<b>Gerdau</b> &middot; 160 desligamentos &middot; PE", "resumo_curto": "Gerdau encerra setores da unidade de Pernambuco e demite cerca…"}, {"titulo": "CPTM mantém greve em SP por risco de 500 demissões", "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxOLVFXMDdMVmduWGU0eXlqSHNWbUY4Q2hqZXBEMzRfcklVaDk5cFdGdzJYcUZFejI5MnZPbmN5RHVNS3RkcTJmaC1Sd1E5OTJWS3lYZk5fYkJEY3pCX2ZpRXpMbFlsLURfa1FYT3dHeHRHNDhkTURWVU5wQVJUMDN6WXRlWQ?oc=5", "empresa": "CPTM", "setor": "Nao classificado", "destaque": false, "qtde": 500, "uf": "SP", "uf_metodo": "sigla no titulo", "veiculo": "93 Notícias", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "MEDIA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.2167, "data": "05/08", "resumo": "<b>CPTM</b> &middot; 500 desligamentos &middot; SP", "resumo_curto": "CPTM mantém greve em SP por risco de 500 demissões"}, {"titulo": "Electronic Arts deve sofrer demissões em massa após a sua aquisição", "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNSzZFblJ6ekNGVUZZczJvWjNtTmtqZ1N3bm16MWtLOU90aGQ3aGxITGdaYWNzWjZVM1JUYkhVWHJfQ3JKQ3U4VlB4dWdWSWRSdllPdnJBZUVvaExsYjNldzFYV2laZTRjdGZBNlBIdXUwWno2dzYtdHFVTXNlbGgzeHVGMDRva0ZkTFAzWVhBY0hFWURPZEw4Tg?oc=5", "empresa": "Electronic Arts", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "PSX Brasil", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.0758, "data": "05/08", "resumo": "<b>Electronic Arts</b> &middot; numero nao divulgado", "resumo_curto": "Electronic Arts deve sofrer demissões em massa após a sua…"}, {"titulo": "Crise global do Grupo Volkswagen leva Porsche a cortar 5 mil postos de trabalho e reduzir salários", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxPb1NNbTB2b2U5NWhRUlItSW5SbEtvTFpzTTJzS2M3YjRWSENtdnBpRTRNRFp0VWU5UnBOeDdfRkJkYVhQaWNFcGNxWHlFRnhWUHZCbEFmMVYxaGVtVndTU0szd0NKSV9RVHBPOVNaa1FEYlN1cXVQWEhOYmlOMzM0NEs5QWdFNjg3alZCd0MxVzgyMVVRb0xWVzlsXzB3NGxScmU4?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": 5000, "uf": "SC", "uf_metodo": "veiculo local (nd mais)", "veiculo": "ND Mais", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "proximidade": "PROXIMO", "verificar": false, "score": 0.7333, "data": "30/07", "resumo": "<b>Volkswagen</b> &middot; 5.000 desligamentos &middot; SC", "resumo_curto": "Crise global do Grupo Volkswagen leva Porsche a cortar 5…"}, {"titulo": "Toyota fecha fábrica após quase 30 anos no Brasil; unidade empregava 1,5 mil funcionários", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxQOGZ5Szhwd0RzSjFSMm10WFFDS1FNZ1R1ajNSbUJoOWNLVkd4UDVuTWZQM1dKUDUwUW1raGYxNk1UY0IyS2hmc2NHX0JiOTdYYzBFX0RsYUF5OVVsZWd3Qzh3ODMzR09vanN0MEhzSjFJZ29qSy1MeVlRUnN4ZDF1TzBDUW12dXpvYnZjUUk0eEg5Y3RCdmhncFpB?oc=5", "empresa": "Toyota", "setor": "Industria e Automotivo", "destaque": false, "qtde": 1500, "uf": "SC", "uf_metodo": "veiculo local (nd mais)", "veiculo": "ND Mais", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "ALTA", "proximidade": "PROXIMO", "verificar": false, "score": 0.5778, "data": "23/07", "resumo": "<b>Toyota</b> &middot; 1.500 desligamentos &middot; SC", "resumo_curto": "Toyota fecha fábrica após quase 30 anos no Brasil; unidade…"}, {"titulo": "Grupo Paulo Lima inicia demissões em massa na TV Fronteira; Sindicatos dos Radialistas e dos Jornalistas acionam a Justiça do Trabalho", "link": "https://news.google.com/rss/articles/CBMi9AFBVV95cUxPN0t1TlYtSDNIX2FpdFNvS1kySW1Pc2dMVVZ2Wi1Ja204OFBIZVpDdmZJSzFzekNINEs2c1lsNzJFUHBhbndfdXlKSVdYVlR4dnNwS2ZFWXBDRFBEQUVzT09jeXJjbmIxbWYzMDFodkxrMVRWc2JBa0tUY0k1RVhuT1lTY3VTYVRLZUdtdnN0cFQyamlkQnd2TmdTMFMydmVGXzdfYWl4VV9fQ0ItcWVYd2M1T3VidklTcjA2cGtGT25TUHlZd2hqVnJDWDhubWZuUXc0WTB4T1JpNXllSlNxWWc3UGp0NTdyVE8zb2VreTFxYkh2?oc=5", "empresa": "TV Fronteira", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Sindicato dos Radialistas de São Paulo", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.0486, "data": "22/07", "resumo": "<b>TV Fronteira</b> &middot; numero nao divulgado", "resumo_curto": "Grupo Paulo Lima inicia demissões em massa na TV Fronteira…"}, {"titulo": "CBF demite funcionários após Portal LeoDias vazar gastos de Samir Xaud", "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOc3pWWFcyMDZzcjZzdEw5OWMtaEU4S1lUd0w2M1JvakNHQURWanF0VkQyWVdycmo2Q2NlYk1mQXl5dVdzbmVlekhiRExkcGhpeHNrVVFYMUsyTXg1Z191UGlFWXVjd05XMU1XeDJtM2wxUHFRT1Y5U3RwSm81Q1NnSjN1ZnplaXdRd1dQcmNmeEtzNGMwaEpBeVgyaEpsQUNGd01rcTBfRmfSAa4BQVVfeXFMUFFSQUthZUN5eG1nOS1wRFdhbTFsMG13a09VMlpMOHNrZWtsOGtkdHBuUHY2OXdBdzZfblJhRWZ4Z3lkMVBMYzlFdFRobTdzbGg2cUowS1ZWOHlvZ0Izc0ZjOXgwVTFURkZ3WnhsMTlFSTNOTDFwOHM1c29mN3lvdmxYVDZBZzZWTGJaazUzbGN6czdnSERHX1RjNE82MEZhdnpkaFptUlpZWGtTTmx3?oc=5", "empresa": "Samir Xaud", "setor": "Nao classificado", "destaque": false, "qtde": null, "uf": "RJ", "uf_metodo": "veiculo local (o dia)", "veiculo": "Portal Leo Dias", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "VERIFICAR", "verificar": true, "score": 0.0369, "data": "16/07", "resumo": "<b>Samir Xaud</b> &middot; numero nao divulgado &middot; RJ", "resumo_curto": "CBF demite funcionários após Portal LeoDias vazar gastos de Samir…"}, {"titulo": "Volkswagen planeja demissões em massa", "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNUjVnUTNNV01IcjJNQlBtMXQ4bTgtMkNRbEJKS1JKaWNkQUlNV3cwY1dMZnlWTEs3bUt6dnV3X29BZmYtdzY1elVQWjZlY1dZbFg1anBXLXhNSjlrYXV5cTdMckdRVXlRWmVVVlljcFdvdG12V1pCMXNmeGNsYVBNQzlHd1VoTWU2bHfSAZIBQVVfeXFMTUE0YlVJWkRuVUtsanNWTW55TFM3VmpZaWpZMVU4T0xmbnUyRnVuY2lHX3MwUUd6N0p0aEpOd1dBTGlFZ2k3OTFhSEpZYmZIQ0VmcEJwcXl5VWJXR2FlQUJWT0oxdE8zR0tYcjlVeThWWUlsem1lLXNyQ1ljTTJkY0dycHNvVUE0bTNxSGE1VlFsbUE?oc=5", "empresa": "Volkswagen", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Gazeta Brasil", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "PROXIMO", "verificar": false, "score": 0.1244, "data": "13/07", "resumo": "<b>Volkswagen</b> &middot; numero nao divulgado", "resumo_curto": "Volkswagen planeja demissões em massa"}, {"titulo": "Toshiba fecha fábrica no Brasil", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBlSXBvOG02S2ZKRUFUSm5GN3o2dmRDVFdDTTJlVjFCUDRSNEtITXNndl9ZLTdEc09DbFVfUy1CVm5TYU55U0J6QmM0UHl1Sm1NT05VOHZWd2xrNlcyTDc0aVpmRjVJejlmTUtJdC1IOHM1WEFHWXl30gF8QVVfeXFMTmFCXzJIN1lvT1dCQi1OckhFZHFVbzhETHljRmlVWUZXbEpvZ1ZXTV9zMjBLb0dfMEEwOHoycENZclFMM2lTQ1VWNnJCcHlBbVZ6WjBRQ3k5YmNLSUxrMkMyWFVvcVB2RllkR0NsZW5tTTJzWUNMbFdUWlptZg?oc=5", "empresa": "Toshiba", "setor": "Industria e Automotivo", "destaque": false, "qtde": null, "uf": "", "uf_metodo": "", "veiculo": "Estadão", "estado": "CONFIRMADO", "antecedente": false, "prioridade": "BAIXA", "proximidade": "PROXIMO", "verificar": false, "score": 0.105, "data": "02/04", "resumo": "<b>Toshiba</b> &middot; numero nao divulgado", "resumo_curto": "Toshiba fecha fábrica no Brasil"}];
 const DESTAQUE = "Energia Eletrica";
+const PESSOAS = [];
 
 const elBusca = document.getElementById('busca');
 const elSetor = document.getElementById('setor');
@@ -506,6 +526,32 @@ function render() {
     : `${vis.length} registros`;
   elAchados.classList.toggle('filtrando', filtrando);
 }
+
+// ---- profissionais (entrada manual, sem raspagem) ----
+(function () {
+  const alvo = document.getElementById('lista-pessoas');
+  const conta = document.getElementById('n-pessoas');
+  if (!alvo) return;
+  conta.textContent = PESSOAS.length;
+  alvo.innerHTML = PESSOAS.length
+    ? PESSOAS.map((p, i) => {
+        const tags = [];
+        if (p.cargo) tags.push(`<span class="tag">${esc(p.cargo)}</span>`);
+        tags.push(p.uf
+          ? `<span class="tag uf">${esc(p.uf)}</span>`
+          : '<span class="tag uf-indef">UF INDETERMINADA</span>');
+        const alvoLink = p.link
+          ? `<a class="ir" href="${esc(p.link)}" target="_blank" rel="noopener">abrir post</a>`
+          : '';
+        return `<li style="animation-delay:${Math.min(i*26,400)}ms">
+          <div class="hora">${esc(p.data)}</div>
+          <p class="manchete">${esc(p.empresa)}</p>
+          <p class="resumo">${esc(p.observacao || 'Profissional informou desligamento')}</p>
+          <div class="tags">${tags.join('')}${alvoLink}</div>
+        </li>`;
+      }).join('')
+    : '<li class="vazio">Nenhuma entrada manual ainda &mdash; preencha entradas_manuais.csv</li>';
+})();
 
 elBusca.addEventListener('input', render);
 elSetor.addEventListener('change', render);
